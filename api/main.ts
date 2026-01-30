@@ -1,11 +1,15 @@
-
-import { serve } from 'std/http';
+import { serve } from "std/http";
 import { sql } from "./db.ts";
 
-serve(async () => {
-  const result = await sql`select 1 as ok`;
-  return Response.json(
-    result[0]
-  );
-});
+serve(async (req) => {
+  if (req.url.endsWith("/health")) {
+    return new Response(JSON.stringify({ status: "ok" }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
+  const result = await sql`SELECT 1 AS ok`;
+  return new Response(JSON.stringify(result[0]), {
+    headers: { "Content-Type": "application/json" },
+  });
+});
