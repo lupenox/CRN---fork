@@ -8,7 +8,5 @@ export const updateResourceField = async ( id: number, field: string, value: str
         UPDATE resources
         SET ${sql(field)} = ${value}
         WHERE id = ${id}
-        RETURNING *;
     `;
-    return result;
 }
