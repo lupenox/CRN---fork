@@ -1,5 +1,4 @@
 import { sql } from "./db.ts";
-import { updateResourceField } from "./routes/resources.ts";
 
 Deno.serve(async (req) => {
 
