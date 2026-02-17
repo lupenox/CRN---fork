@@ -1,7 +1,6 @@
 import { sql } from "./db.ts";
 
 Deno.serve(async (req) => {
-
   if (req.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -12,10 +11,11 @@ Deno.serve(async (req) => {
       },
     });
   }
+
   if (req.url.endsWith("/health")) {
     return new Response(JSON.stringify({ status: "ok" }), {
-      headers: { 
-        "Content-Type": "application/json",  
+      headers: {
+        "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
     });
@@ -44,7 +44,7 @@ if (req.method === "PATCH" && req.url.endsWith("/update-resource")) {
 
   const result = await sql`SELECT 1 AS ok`;
   return new Response(JSON.stringify(result[0]), {
-    headers: { 
+    headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
     },
