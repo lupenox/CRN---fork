@@ -5,6 +5,13 @@ import * as eva from '@eva-design/eva';
 import { useColorScheme } from 'react-native';
 import { lightTheme, darkTheme } from './src/theme/customTheme.ts';
 
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import DirectoryScreen from './src/screens/DirectoryScreen';
+
+const Stack = createNativeStackNavigator();
+
 export default function App() {
 
 	const systemTheme = useColorScheme() ?? 'light';
@@ -13,10 +20,11 @@ export default function App() {
 
   return (
     <ApplicationProvider {...eva} theme={{...evaTheme, ...customTheme}}>
-      <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text category="h1">App.tsx</Text>
-		<Button>UI Kitten Button</Button>
-      </Layout>
+      <NavigationContainer>
+        <Stack.Navigator>
+            <Stack.Screen name="Directory of UWM Resources" component={DirectoryScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </ApplicationProvider>
   );
 }
