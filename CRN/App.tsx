@@ -10,6 +10,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import DirectoryScreen from './src/screens/DirectoryScreen';
 import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen';
+import Account from './src/screens/Account';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
         <Stack.Navigator>
             <Stack.Screen name="Directory of UWM Resources" component={DirectoryScreen} />
             <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
+            <Stack.Screen name="Account" component={Account} />
         </Stack.Navigator>
       </NavigationContainer>
     </ApplicationProvider>
