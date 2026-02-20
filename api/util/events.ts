@@ -67,7 +67,8 @@ export async function createEvent(event : CrnEvent) {
 }
 
 /**
- * @param event to insert into Events table
+ * @param id of event to update
+ * @param fields event fields to update
  * @returns true on success and false on failure
  */
 export async function updateEvent(id : number, fields : Record<string, string>) {

@@ -86,12 +86,7 @@ export async function PATCH(req : Request) {
         return CrnResponse(null, 'Invalid JSON');
     }
 
-    if(
-        await updateEvent(
-            parseInt(id),
-            obj
-        )
-    ) {
+    if(await updateEvent(parseInt(id), obj)) {
         return CrnResponse();
     } else {
         return CrnResponse(null, 'Failed to update');
