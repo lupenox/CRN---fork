@@ -1,7 +1,5 @@
-import { GetDefaultHeaders } from "../util/headers.ts";
+import CrnResponse from "../util/httpResponse.ts";
 
 export function GET(_req : Request) {
-  return new Response(JSON.stringify({ status: "ok" }), {
-    headers: GetDefaultHeaders(),
-  });
+  return CrnResponse();
 }
