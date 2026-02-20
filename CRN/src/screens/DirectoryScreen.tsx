@@ -43,13 +43,7 @@ const mockDirectoryElements: Event[] = [
       useLayoutEffect(() => {
           navigation.setOptions({
             headerRight: () => (
-              <Button
-                size="small"
-                appearance="ghost"
-                onPress={() => navigation.navigate('Account')}
-              >
-                Account
-              </Button>
+              <Button size="small" appearance="ghost" style={{ paddingHorizontal: 0 }} textStyle={{ color: 'black' }} status="basic" onPress={() => navigation.navigate('Account')} > Account </Button>
             ),
           });
         }, [navigation]);
