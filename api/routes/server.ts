@@ -1,4 +1,5 @@
 import { GetDefaultHeaders } from "../util/headers.ts";
+import CrnResponse from "../util/httpResponse.ts";
 
 // from docs https://docs.deno.com/examples/file_based_routing_tutorial/
 async function handler(req: Request): Promise<Response> {
@@ -19,14 +20,14 @@ async function handler(req: Request): Promise<Response> {
   try {
     module = await import(`.${path}.ts`);
   } catch (_error) {
-    return new Response("Not found", { status: 404 });
+    return CrnResponse(null, 'Not found', { status: 404 });
   }
 
   if (module[method]) {
     return module[method](req);
   }
 
-  return new Response("Method not implemented", { status: 501 });
+  return CrnResponse(null, 'Method not implemented', { status: 501 });
 }
 
 Deno.serve(handler);
