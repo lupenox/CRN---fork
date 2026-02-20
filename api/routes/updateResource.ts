@@ -21,5 +21,5 @@ export async function POST(_req : Request) {
         return CrnResponse(null, error, { status: 500 });
     }
 
-    return CrnResponse(JSON.stringify({ field: field, value: value }));
+    return CrnResponse({ field: field, value: value });
 }

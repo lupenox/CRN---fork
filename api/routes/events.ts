@@ -6,7 +6,7 @@ export async function GET(req : Request) {
     const id = url.searchParams.get("id");
     try {
         const events = await getEvents(id);
-        return CrnResponse(JSON.stringify(events));
+        return CrnResponse(events);
     } catch (err) {
         return CrnResponse(null, String(err));
     }
@@ -26,7 +26,7 @@ export async function DELETE(req : Request) {
     }
     try {
         const deletedEvent = await deleteEvent(id);
-        return CrnResponse(JSON.stringify(deletedEvent));
+        return CrnResponse(deletedEvent);
     } catch (err) {
         return CrnResponse(null, String(err));
     }

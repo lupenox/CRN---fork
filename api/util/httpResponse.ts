@@ -2,7 +2,7 @@ import { GetDefaultHeaders } from "./headers.ts";
 
 type ResponseBody = {
     success : boolean,
-    data ?: string | null,
+    data ?: string | object | null,
     error ?: string | null
 }
 
@@ -23,7 +23,7 @@ type ResponseBody = {
  * @returns A Response object containing the serialized JSON body.
  */
 export default function CrnResponse(
-    data ?: string | null,
+    data ?: string | object | null,
     error ?: string | null,
     init ?: ResponseInit
 ) : Response {
