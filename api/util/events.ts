@@ -65,3 +65,50 @@ export async function createEvent(event : CrnEvent) {
 
     return true;
 }
+
+/**
+ * @param event to insert into Events table
+ * @returns true on success and false on failure
+ */
+export async function updateEvent(id : number, fields : Record<string, string>) {
+    const keys : (keyof CrnEvent)[] = [
+        'Title',
+        'Date',
+        'Location',
+        'Description',
+        'Organizer'
+    ];
+
+    const validRecords: Record<string, string> = {};
+    for (const k of keys) {
+        if (fields[k] != null) {
+            validRecords[k.toLowerCase()] = fields[k];
+        }
+    }
+
+    const entries = Object.entries(validRecords);
+    if(entries.length === 0) {
+        return false;
+    }
+
+    const setClause = entries
+        .map(
+            ([k, v]) => sql`${sql(k)} = ${v}`
+        )
+        .reduce(
+            (prev, curr) => sql`${prev}, ${curr}`
+        );
+
+    try {
+        await sql`
+            UPDATE ${sql(EVENTS_TABLE_NAME)}
+            SET ${setClause}
+            WHERE id = ${id}
+        `;
+    } catch(err) {
+        console.log(err);
+        return false;
+    }
+
+    return true;
+}
