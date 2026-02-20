@@ -1,17 +1,35 @@
-name: Lint Code Base
+name: CI Pipeline
+
 on: [push, pull_request]
 
 jobs:
-  lint:
+  backend-check:
+    name: Backend (Deno)
     runs-on: ubuntu-latest
     steps:
-      - name: Setup repo
-        uses: actions/checkout@v4
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
-
-      - name: Run Deno Lint
+      - name: Deno Lint
         run: deno lint api/
+      - name: Deno Tests
+        run: deno test api/
+
+  frontend-check:
+    name: Frontend (Node/Jest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: './CRN/package.json'
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./CRN
+      - name: Run Jest Tests
+        run: npm test
+        working-directory: ./CRN
