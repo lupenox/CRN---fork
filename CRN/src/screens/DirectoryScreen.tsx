@@ -1,5 +1,5 @@
-import React from 'react';
-import { Layout, Text, Card, Divider } from '@ui-kitten/components';
+import React, { useLayoutEffect } from 'react';
+import { Layout, Text, Card, Divider, Button } from '@ui-kitten/components';
 import { ScrollView, Linking } from 'react-native';
 
 type Event = {
@@ -39,6 +39,21 @@ const mockDirectoryElements: Event[] = [
 ];
 
   export default function DirectoryScreen({ navigation }) {
+
+      useLayoutEffect(() => {
+          navigation.setOptions({
+            headerRight: () => (
+              <Button
+                size="small"
+                appearance="ghost"
+                onPress={() => navigation.navigate('Account')}
+              >
+                Account
+              </Button>
+            ),
+          });
+        }, [navigation]);
+
     return (
       <Layout style={{ flex: 1, padding: 16 }}>
         <ScrollView contentContainerStyle={{ gap: 12 }}>
