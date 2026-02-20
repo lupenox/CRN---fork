@@ -19,7 +19,8 @@ async function handler(req: Request): Promise<Response> {
 
   try {
     module = await import(`.${path}.ts`);
-  } catch (_error) {
+  } catch (err) {
+    console.log(err);
     return CrnResponse(null, 'Not found', { status: 404 });
   }
 

@@ -1,18 +1,9 @@
 import postgres from "postgres";
 
+const ssl = Deno.env.get("DEV") === 'true' ? undefined : 'require';
 export const sql = postgres(
   Deno.env.get("DATABASE_URL")!,
   {
-    ssl: "require",
+    ssl: ssl,
   }
 );
-
-// db setup
-export const PocTableName = 'poc_test';
-await sql`
-  create table if NOT exists ${sql(PocTableName)} (
-      id serial primary key,
-      name text,
-      value text
-  );
-`;
