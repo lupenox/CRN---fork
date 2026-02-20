@@ -1,5 +1,6 @@
 import { getEvents, deleteEvent, createEvent, CrnEvent } from "../util/events.ts";
 import CrnResponse from "../util/httpResponse.ts";
+import parseJson from "../util/parseJson.ts";
 
 export async function GET(req : Request) {
     const url = new URL(req.url);
@@ -36,7 +37,18 @@ export async function POST(req : Request) {
     const text = await req.text();
     let event : CrnEvent;
     try {
-        event = (await JSON.parse(text));
+        event = parseJson<CrnEvent>(
+            text,
+            [
+                'Title',
+                'Date',
+                'Location',
+                'Description',
+            ]
+        );
+        if(event == null) {
+            throw new Error();
+        }
     } catch {
         return CrnResponse(
             null,

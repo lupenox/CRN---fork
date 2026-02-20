@@ -55,7 +55,7 @@ export async function createEvent(event : CrnEvent) {
                 ${event.Date},
                 ${event.Location},
                 ${event.Description},
-                    ${event.Organizer}
+                ${event.Organizer ?? ''}
             );
         `;
     } catch(err) {
