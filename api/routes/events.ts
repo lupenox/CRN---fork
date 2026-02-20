@@ -1,4 +1,3 @@
-import { GetDefaultHeaders } from "../util/headers.ts";
 import { getEvents, deleteEvent, createEvent, CrnEvent } from "../util/events.ts";
 import CrnResponse from "../util/httpResponse.ts";
 
