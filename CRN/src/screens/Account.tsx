@@ -1,3 +1,4 @@
+//Account.tsx
 
 import { 
 	Card,
@@ -21,7 +22,9 @@ import { StyleSheet } from 'react-native';
 
 export default function Account(){
 
-	// //SAVE FOR ENDPOINTS
+	// //@Note
+	// //@See user <Object> below
+	// //EXAMPLE FOR ENDPOINT IMPLEMENTATION
 	// async function getUserInfo(){
 	// 	const user = await fetch(`${process.env.BASE_URL}`);
 	// 	if(!user) console.error('Account: Failed to fetch user info');
@@ -56,11 +59,21 @@ export default function Account(){
 	const [isUsernameChanged, setUsernameChanged] = useState(false);
 
 
+	/*
+	 * updates email to whatever has been typed.
+	 * As a side-effect, whenever this function is called
+	 * the open cancel and change buttons are closed
+	 */
 	function handleEmailChange(){
 		setEmail(newEmail);
 		setEmailChanged(false);
 	}
 
+	/*
+	 * updates password to whatever has been typed.
+	 * As a side-effect, whenever this function is called
+	 * the open cancel and change buttons are closed
+	 */
 	function handlePasswordChange(){
 		if(password === oldPassword){
 			setPassword(newPassword);
@@ -68,6 +81,11 @@ export default function Account(){
 		}
 	}
 
+	/*
+	 * updates username to whatever has been typed.
+	 * As a side-effect, whenever this function is called
+	 * the open cancel and change buttons are closed
+	 */
 	function handleUsernameChange(){
 		setUsername(newUsername);
 		setUsernameChanged(false);
@@ -76,6 +94,13 @@ export default function Account(){
 	return(
 		<Layout style={{flex: 1}}>
 			<Card style={styles.card}>
+
+				{/*
+					@TODO change the avatar icon to something
+					more fitting. We may want to support users
+					uploading an image or just have a default
+					for everyone
+				*/}
 				<Avatar 
 					style={styles.avatar}
 					size='giant'
@@ -90,6 +115,10 @@ export default function Account(){
 					}}
 				/>
 				{
+					/*
+					 * Username button group. If a person were to edit the username
+					 * the buttons for handling that changed will appear on the page.
+					 */
 					isUsernameChanged?(
 						<ButtonGroup style={styles.btn_group}>
 							<Button 
@@ -116,6 +145,10 @@ export default function Account(){
 					}}
 				/>
 				{
+					/*
+					 * Email button group. If a person were to edit the email 
+					 * the buttons for handling that changed will appear on the page.
+					 */
 					isEmailChanged?(
 						<ButtonGroup style={styles.btn_group}>
 							<Button 
@@ -150,6 +183,14 @@ export default function Account(){
 					}}
 				/>
 				{
+					/*
+					 * Password button group. If a person were to edit the password 
+					 * the buttons for handling that changed will appear on the page.
+					 * 
+					 * @Note this group will behave differently onPress than the other groups
+					 * For a password to change successfully, then they will need to type their
+					 * old password correctly otherwise it will just remain open
+					 */
 					isPasswordChanged?(
 						<ButtonGroup style={styles.btn_group}>
 							<Button 
@@ -166,6 +207,11 @@ export default function Account(){
 					):(<></>)
 				}
 				<Divider style={styles.divider}/>
+				{/*
+					@Note for any additional information
+					current format is to separate by divider
+					and then add your content
+				*/}
 			</Card>
 		</Layout>
 	);
@@ -173,6 +219,13 @@ export default function Account(){
 
 /**
  * @Note style object for this screen.
+ * The values are quite arbitrarily chosen
+ *
+ * @TODO fix styling to look more professional
+ * At the moment the spacing isn't necessarily
+ * the best between buttons or components 
+ *
+ * CurrentState: MVP
  */
 const styles = StyleSheet.create({
 	card: {
