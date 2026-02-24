@@ -12,6 +12,10 @@ import DirectoryScreen from './src/screens/DirectoryScreen';
 import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen';
 import Account from './src/screens/Account';
 
+import { SideMenuProvider } from './src/navigation/SideMenuContext';
+import SideMenu from './src/navigation/SideMenu';
+import MenuButton from './src/navigation/MenuButton';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -22,13 +26,22 @@ export default function App() {
 
   return (
     <ApplicationProvider {...eva} theme={{...evaTheme, ...customTheme}}>
+     <SideMenuProvider>
       <NavigationContainer>
-        <Stack.Navigator>
-            <Stack.Screen name="Directory of UWM Resources" component={DirectoryScreen} />
+          <Stack.Navigator
+            initialRouteName="Directory"
+            screenOptions={{
+              headerLeft: () => <MenuButton />,
+            }}
+          >
+            <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of Resources' }} />
             <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
             <Stack.Screen name="Account" component={Account} />
-        </Stack.Navigator>
+          </Stack.Navigator>
+
+          <SideMenu />
       </NavigationContainer>
+     </SideMenuProvider>
     </ApplicationProvider>
   );
 }

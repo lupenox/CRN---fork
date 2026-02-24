@@ -1,14 +1,29 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useContext } from 'react';
 import { Layout, Text, Card, Divider, Button } from '@ui-kitten/components';
-import { ScrollView, Linking } from 'react-native';
+import { ScrollView, Linking, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { SideMenuContext } from '../navigation/SideMenuContext';
 
 export default function DirectoryDetailScreen({ route, navigation })
 {
     const { event } = route.params ?? {};
+    const { closeMenu } = useContext(SideMenuContext);
 
     useLayoutEffect(() =>
     {
-        navigation.setOptions({ title: event?.title ?? 'Detail' });
+        navigation.setOptions({ title: event?.title ?? 'Detail',
+            headerLeft: () => (
+                <TouchableOpacity
+                    onPress={() => {
+                        closeMenu();
+                        navigation.goBack();
+                    }}
+                    style={{ paddingHorizontal: 12 }}
+                >
+                    <Ionicons name="arrow-back-outline" size={24} />
+                </TouchableOpacity>
+              ),
+          });
     }, [navigation, event]);
 
     if(!event)
