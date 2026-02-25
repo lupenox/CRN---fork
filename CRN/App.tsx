@@ -8,9 +8,10 @@ import { lightTheme, darkTheme } from './src/theme/customTheme.ts';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import DirectoryScreen from './src/screens/DirectoryScreen';
-import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen';
-import Account from './src/screens/Account';
+import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
+import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen.tsx';
+import Account from './src/screens/Account.tsx';
+import Login from './src/screens/Login.tsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,7 +25,8 @@ export default function App() {
     <ApplicationProvider {...eva} theme={{...evaTheme, ...customTheme}}>
       <NavigationContainer>
         <Stack.Navigator>
-            <Stack.Screen name="Directory of UWM Resources" component={DirectoryScreen} />
+            <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+            <Stack.Screen name="Home" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
             <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
             <Stack.Screen name="Account" component={Account} />
         </Stack.Navigator>
