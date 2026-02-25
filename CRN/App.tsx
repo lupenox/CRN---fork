@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { ApplicationProvider, Button, Layout, Text } from '@ui-kitten/components';
+import { ApplicationProvider, Button, Layout, Text, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
+import { EvaIconsPack } from '@ui-kitten/eva-icons';
 
 import { useColorScheme } from 'react-native';
 import { lightTheme, darkTheme } from './src/theme/customTheme.ts';
@@ -26,8 +27,9 @@ export default function App() {
 
   return (
     <ApplicationProvider {...eva} theme={{...evaTheme, ...customTheme}}>
-     <SideMenuProvider>
-      <NavigationContainer>
+     <IconRegistry icons={EvaIconsPack} />
+      <SideMenuProvider>
+       <NavigationContainer>
           <Stack.Navigator
             initialRouteName="Directory"
             screenOptions={{
@@ -40,8 +42,8 @@ export default function App() {
           </Stack.Navigator>
 
           <SideMenu />
-      </NavigationContainer>
-     </SideMenuProvider>
+       </NavigationContainer>
+      </SideMenuProvider>
     </ApplicationProvider>
   );
 }

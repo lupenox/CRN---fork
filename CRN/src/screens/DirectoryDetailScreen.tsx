@@ -1,7 +1,6 @@
 import React, { useLayoutEffect, useContext } from 'react';
-import { Layout, Text, Card, Divider, Button } from '@ui-kitten/components';
+import { Layout, Text, Card, Divider, Button, Icon } from '@ui-kitten/components';
 import { ScrollView, Linking, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { SideMenuContext } from '../navigation/SideMenuContext';
 
 export default function DirectoryDetailScreen({ route, navigation })
@@ -20,7 +19,7 @@ export default function DirectoryDetailScreen({ route, navigation })
                     }}
                     style={{ paddingHorizontal: 12 }}
                 >
-                    <Ionicons name="arrow-back-outline" size={24} />
+                    <Icon name="arrow-back" style={{width: 24, height: 24}} />
                 </TouchableOpacity>
               ),
           });

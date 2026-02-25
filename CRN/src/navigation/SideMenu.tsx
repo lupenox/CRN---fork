@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { View, TouchableOpacity, Dimensions } from 'react-native';
 import { Layout, Text, Button, Divider } from '@ui-kitten/components';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@ui-kitten/components';
 import { useNavigation } from '@react-navigation/native';
 import { SideMenuContext } from './SideMenuContext';
 
@@ -34,7 +34,7 @@ export default function SideMenu() {
 
           {/* Account Icon */}
           <TouchableOpacity onPress={() => goTo('Account')}>
-            <Ionicons name="person-circle-outline" size={28} />
+            <Icon name="person-outline" style={{ width: 28, height: 28}} fill="#222B45"/>
           </TouchableOpacity>
         </View>
 
