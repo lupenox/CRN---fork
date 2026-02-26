@@ -1,5 +1,4 @@
-//Account.tsx
-
+import React from 'react';
 import { 
 	Card,
 	Button,
@@ -206,7 +205,7 @@ export default function Account(){
 						</ButtonGroup>
 					):(<></>)
 				}
-				<Divider style={styles.divider}/>
+				{/* <Divider style={styles.divider}/> */}
 				{/*
 					@Note for any additional information
 					current format is to separate by divider
@@ -232,7 +231,7 @@ const styles = StyleSheet.create({
 		margin: 'auto',
 		padding: 10,
 		width: '75%',
-		height: '50%',
+		height: '55%',
 	},
 	input: {
 		marginTop: 10,
