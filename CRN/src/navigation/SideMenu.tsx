@@ -44,6 +44,9 @@ export default function SideMenu() {
         <Button appearance="ghost" onPress={() => goTo('Directory')}>
           Directory
         </Button>
+        <Button appearance="ghost" onPress={() => goTo('Map')}>
+          Map
+        </Button>
 
         {/* add more items as needed */}
       </Layout>
