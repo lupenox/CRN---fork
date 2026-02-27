@@ -21,8 +21,8 @@ export default function DirectoryDetailScreen({ route, navigation })
                 >
                     <Icon name="arrow-back" style={{width: 24, height: 24}} />
                 </TouchableOpacity>
-              ),
-          });
+            ),
+        });
     }, [navigation, event]);
 
     if(!event)
@@ -35,21 +35,21 @@ export default function DirectoryDetailScreen({ route, navigation })
     }
     return (
         <Layout style={{ flex: 1, padding: 16 }}>
-          <ScrollView>
-            <Card style={{ paddingVertical: 12 }}>
-              <Text category="h5" style={{ marginBottom: 6 }}>{event.title}</Text>
-              <Text appearance="hint" style={{ marginBottom: 8 }}>{event.location}</Text>
+            <ScrollView>
+                <Card style={{ paddingVertical: 12 }}>
+                <Text category="h5" style={{ marginBottom: 6 }}>{event.name}</Text>
+                <Text appearance="hint" style={{ marginBottom: 8 }}>{event.building}</Text>
 
-              <Divider style={{ marginVertical: 8 }} />
+                <Divider style={{ marginVertical: 8 }} />
 
-              <Text category="c1" style={{ marginBottom: 6 }}>Hours: {event.hours}</Text>
-              <Text style={{ marginBottom: 8 }}>{event.info}</Text>
+                <Text category="c1" style={{ marginBottom: 6 }}>Hours: {event.hours}</Text>
+                <Text style={{ marginBottom: 8 }}>{event.description}</Text>
 
-              <Button onPress={() => Linking.openURL(event.link)} style={{ marginTop: 12 }}>
-                Open Website
-              </Button>
-            </Card>
-          </ScrollView>
-        </Layout>
-      );
+                <Button onPress={() => Linking.openURL(event.website)} style={{ marginTop: 12 }}>
+                    Open Website
+                </Button>
+                </Card>
+            </ScrollView>
+            </Layout>
+        );
 }
