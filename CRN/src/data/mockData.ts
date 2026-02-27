@@ -1,9 +1,9 @@
 export type Resource = {
   id: number;
-  name: string;
+  title: string;
   category: string;
   description: string;
-  building: string;
+  location: string;
   address: string;
   phone: string;
   website: string;
@@ -24,11 +24,11 @@ export type MockEvent = {
 export const mockResources: Resource[] = [
   {
     id: 1,
-    name: "Tutoring Center",
+    title: "Tutoring Center",
     category: "Academic Support",
     description:
       "Tutoring and Supplemental Instruction services within the Student Success Center provides UW-Milwaukee undergraduate students with a variety of academic support services including one-on-one tutoring, group sessions, and Supplemental Instruction for historically difficult courses.",
-    building: "Bolton Hall",
+    location: "Bolton Hall",
     address: "Bolton Hall 120, 3210 N Maryland Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4174",
     website: "https://uwm.edu/studentsuccess/tutoring-and-supplemental-instruction/",
@@ -38,11 +38,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 2,
-    name: "Financial Aid Center",
+    title: "Financial Aid Center",
     category: "Financial Services",
     description:
       "Student Financial Services represents the Offices of Financial Aid Administration, Student Accounts, and Student Scholarships. The Student Financial Service Center serves as students' and families' go-to place for answers to questions about scholarships, financial aid, and billing.",
-    building: "Mellencamp Hall",
+    location: "Mellencamp Hall",
     address: "Mellencamp Hall 162, 2025 E Newport Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4541",
     website: "https://uwm.edu/finances/",
@@ -52,11 +52,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 3,
-    name: "Student Dining",
+    title: "Student Dining",
     category: "Food & Dining",
     description:
       "Dining at UWM caters to every taste and lifestyle, while accommodating dietary and nutritional needs and sourcing local and eco-friendly ingredients. Dining options include the Union food court, campus cafes, and the Panther Dining Hall.",
-    building: "UWM Student Union",
+    location: "UWM Student Union",
     address: "2200 E. Kenwood Blvd., Milwaukee, WI 53211",
     phone: "(414) 229-4828",
     website: "https://uwm.edu/dining/",
@@ -66,11 +66,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 4,
-    name: "Norris Health Center",
+    title: "Norris Health Center",
     category: "Health & Wellness",
     description:
       "Norris Health Center provides comprehensive primary care, mental health, and wellness services to currently enrolled UWM students. Services include medical appointments, immunizations, health education, and referrals to community providers.",
-    building: "Norris Health Center",
+    location: "Norris Health Center",
     address: "2441 E Hartford Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4716",
     website: "https://uwm.edu/norris/",
@@ -80,11 +80,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 5,
-    name: "Golda Meir Library",
+    title: "Golda Meir Library",
     category: "Academic Support",
     description:
       "UWM's main library offers extensive print and digital collections, research consultation with subject librarians, group study rooms, computer workstations, interlibrary loan services, and special collections including the American Geographical Society Library.",
-    building: "Golda Meir Library",
+    location: "Golda Meir Library",
     address: "2311 E. Hartford Ave., Milwaukee, WI 53211",
     phone: "(414) 229-4785",
     website: "https://uwm.edu/libraries/",
@@ -94,11 +94,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 6,
-    name: "UWM Police Department",
+    title: "UWM Police Department",
     category: "Campus Safety",
     description:
       "The UWM Police Department provides 24/7 law enforcement, emergency response, and safety services for the UWM campus community. Services include escort services, crime reporting, Panther Safe Ride, and emergency blue-light phone stations.",
-    building: "Chapman Hall",
+    location: "Chapman Hall",
     address: "Chapman Hall, 3101 N Maryland Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4627",
     website: "https://uwm.edu/police/",
@@ -108,11 +108,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 7,
-    name: "IT Help Desk",
+    title: "IT Help Desk",
     category: "Technology",
     description:
       "UWM's IT Help Desk provides technical support for students, faculty, and staff. Services include help with UWM email, network access, software installation, computer troubleshooting, and access to campus technology resources including Adobe Creative Cloud and Microsoft 365.",
-    building: "Golda Meir Library",
+    location: "Golda Meir Library",
     address: "Golda Meir Library 1st Floor, 2311 E. Hartford Ave., Milwaukee, WI 53211",
     phone: "(414) 229-4040",
     website: "https://uwm.edu/technology/",
@@ -122,11 +122,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 8,
-    name: "Career Development Center",
+    title: "Career Development Center",
     category: "Student Life",
     description:
       "The UWM Career Development Center helps students and alumni with career exploration, resume and cover letter reviews, mock interviews, job and internship searches, and networking connections with employers.",
-    building: "Sheldon B. Lubar College of Business",
+    location: "Sheldon B. Lubar College of Business",
     address: "3202 N. Maryland Avenue, Milwaukee, WI 53211",
     phone: "(414) 229-4486",
     website: "https://uwm.edu/careerdevelopment/",
@@ -136,11 +136,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 9,
-    name: "Disability Resource Center",
+    title: "Disability Resource Center",
     category: "Student Life",
     description:
       "The Disability Resource Center (DRC) provides academic accommodations and support services to students with documented disabilities, including physical, sensory, learning, psychiatric, and chronic health conditions.",
-    building: "Mitchell Hall",
+    location: "Mitchell Hall",
     address: "Mitchell Hall 112, 3203 N Downer Ave, Milwaukee, WI 53211",
     phone: "(414) 229-6287",
     website: "https://uwm.edu/drc/",
@@ -150,11 +150,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 10,
-    name: "Writing Center",
+    title: "Writing Center",
     category: "Academic Support",
     description:
       "The UWM Writing Center offers free one-on-one writing consultations for students at any stage of the writing process. Consultants help with brainstorming, organizing ideas, developing arguments, and improving clarity—for any class, any major.",
-    building: "Curtin Hall",
+    location: "Curtin Hall",
     address: "Curtin Hall 172, 3243 N Downer Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4339",
     website: "https://uwm.edu/writingcenter/",
@@ -164,11 +164,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 11,
-    name: "Math Learning Center",
+    title: "Math Learning Center",
     category: "Academic Support",
     description:
       "The Math Learning Center (MLC) provides free drop-in tutoring for students enrolled in 100- and 200-level mathematics courses. Experienced tutors are available to help with homework, exam preparation, and conceptual understanding.",
-    building: "Enderis Hall",
+    location: "Enderis Hall",
     address: "Enderis Hall 116, 2400 E Hartford Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4845",
     website: "https://uwm.edu/math/mlc/",
@@ -178,11 +178,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 12,
-    name: "Counseling Services",
+    title: "Counseling Services",
     category: "Health & Wellness",
     description:
       "UWM Counseling Services provides confidential mental health support including individual counseling, group therapy, crisis intervention, and psychiatric services. Open to all currently enrolled UWM students. Same-day crisis appointments available.",
-    building: "Mellencamp Hall",
+    location: "Mellencamp Hall",
     address: "Mellencamp Hall 129, 2025 E Newport Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4716",
     website: "https://uwm.edu/norris/counseling/",
@@ -192,11 +192,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 13,
-    name: "International Student Services",
+    title: "International Student Services",
     category: "Student Life",
     description:
       "International Student Services assists international students with immigration advising, F-1 and J-1 visa compliance, cultural adjustment support, and programs that help build community between international and domestic students.",
-    building: "Mitchell Hall",
+    location: "Mitchell Hall",
     address: "Mitchell Hall 346, 3203 N Downer Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4846",
     website: "https://uwm.edu/iss/",
@@ -206,11 +206,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 14,
-    name: "Veterans Resource Center",
+    title: "Veterans Resource Center",
     category: "Student Life",
     description:
       "The Veterans Resource Center (VRC) at UWM serves student veterans, service members, and military-connected students. Services include VA benefit certification, academic advising, peer mentoring, a lounge space, and connection to campus and community support.",
-    building: "UWM Student Union",
+    location: "UWM Student Union",
     address: "Student Union 158, 2200 E. Kenwood Blvd., Milwaukee, WI 53211",
     phone: "(414) 229-5560",
     website: "https://uwm.edu/veterans/",
@@ -220,11 +220,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 15,
-    name: "LGBTQ+ Resource Center",
+    title: "LGBTQ+ Resource Center",
     category: "Student Life",
     description:
-      "The LGBTQ+ Resource Center provides education, advocacy, and support for LGBTQ+ students, staff, and faculty at UWM. Programs include the Preferred Name program, Safe Zone training, community events, and access to gender-inclusive restrooms.",
-    building: "UWM Student Union",
+      "The LGBTQ+ Resource Center provides education, advocacy, and support for LGBTQ+ students, staff, and faculty at UWM. Programs include the Preferred title program, Safe Zone training, community events, and access to gender-inclusive restrooms.",
+    location: "UWM Student Union",
     address: "Student Union 156, 2200 E. Kenwood Blvd., Milwaukee, WI 53211",
     phone: "(414) 229-5559",
     website: "https://uwm.edu/lgbtrc/",
@@ -234,11 +234,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 16,
-    name: "Klotsche Center (UREC)",
+    title: "Klotsche Center (UREC)",
     category: "Health & Wellness",
     description:
       "The Klotsche Center is UWM's main recreational facility, offering a fitness center, indoor track, basketball courts, racquetball courts, swimming pool, and group fitness classes. All currently enrolled students have free access with a valid UWM ID.",
-    building: "Klotsche Center",
+    location: "Klotsche Center",
     address: "3409 N Downer Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4094",
     website: "https://uwm.edu/urec/",
@@ -248,11 +248,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 17,
-    name: "Multicultural Student Center",
+    title: "Multicultural Student Center",
     category: "Student Life",
     description:
       "The Multicultural Student Center (MSC) promotes the success of students of color through academic support, mentoring, cultural programming, and community building. The center hosts affinity spaces and coordinates partnerships with culturally specific student organizations.",
-    building: "Mellencamp Hall",
+    location: "Mellencamp Hall",
     address: "Mellencamp Hall G18, 2025 E Newport Ave, Milwaukee, WI 53211",
     phone: "(414) 229-5560",
     website: "https://uwm.edu/msc/",
@@ -262,11 +262,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 18,
-    name: "Student Employment Office",
+    title: "Student Employment Office",
     category: "Financial Services",
     description:
       "The Student Employment Office connects UWM students with on-campus and federal work-study job opportunities. Services include job listings, hiring paperwork, payroll processing, and resources for students seeking part-time employment while enrolled.",
-    building: "Mellencamp Hall",
+    location: "Mellencamp Hall",
     address: "Mellencamp Hall 270, 2025 E Newport Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4356",
     website: "https://uwm.edu/financialaid/types-of-aid/employment/",
@@ -276,11 +276,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 19,
-    name: "Panther Pantry",
+    title: "Panther Pantry",
     category: "Food & Dining",
     description:
       "The Panther Pantry is a free food pantry open to all UWM students experiencing food insecurity. Students can visit once per week to select from shelf-stable foods, fresh produce, hygiene products, and household supplies—no documentation or proof of need required.",
-    building: "UWM Student Union",
+    location: "UWM Student Union",
     address: "Student Union 154, 2200 E. Kenwood Blvd., Milwaukee, WI 53211",
     phone: "(414) 229-4485",
     website: "https://uwm.edu/studentaffairs/panther-pantry/",
@@ -290,11 +290,11 @@ export const mockResources: Resource[] = [
   },
   {
     id: 20,
-    name: "Office of Student Financial Aid",
+    title: "Office of Student Financial Aid",
     category: "Financial Services",
     description:
       "The Office of Student Financial Aid administers federal, state, and institutional financial aid programs including grants, loans, and scholarships. Advisors help students understand their financial aid packages, maintain eligibility, and navigate appeals or special circumstances.",
-    building: "Mellencamp Hall",
+    location: "Mellencamp Hall",
     address: "Mellencamp Hall 162, 2025 E Newport Ave, Milwaukee, WI 53211",
     phone: "(414) 229-4541",
     website: "https://uwm.edu/financialaid/",
