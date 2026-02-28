@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout, Card, Input, Button, Text } from '@ui-kitten/components';
 import { StyleSheet } from 'react-native';
-import { useState } from 'react';
 
-export default function Login({ navigation }: { navigation: any }) {
+export default function SignUp({ navigation }: { navigation: any }) {
+	const [name, setName] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 
 	return (
 		<Layout style={styles.container}>
 			<Card style={styles.card}>
-				<Text category='h5' style={styles.title}>Campus Resource Navigator</Text>
+				<Text category='h5' style={styles.title}>Create Account</Text>
+				<Input
+					style={styles.input}
+					placeholder='Name'
+					value={name}
+					onChangeText={setName}
+				/>
 				<Input
 					style={styles.input}
 					placeholder='Email'
@@ -26,18 +33,25 @@ export default function Login({ navigation }: { navigation: any }) {
 					onChangeText={setPassword}
 					secureTextEntry
 				/>
+				<Input
+					style={styles.input}
+					placeholder='Confirm Password'
+					value={confirmPassword}
+					onChangeText={setConfirmPassword}
+					secureTextEntry
+				/>
 				<Button
 					style={styles.btn}
 					onPress={() => navigation.replace('Directory')}
 				>
-					Login
+					Create Account
 				</Button>
 				<Button
 					style={styles.btn}
 					appearance='ghost'
-					onPress={() => navigation.navigate('SignUp')}
+					onPress={() => navigation.goBack()}
 				>
-					Create Account
+					Back to Login
 				</Button>
 			</Card>
 		</Layout>
