@@ -8,6 +8,7 @@ import { lightTheme, darkTheme } from './src/theme/customTheme.ts';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
 import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen.tsx';
@@ -29,6 +30,7 @@ export default function App() {
 
   return (
     <ApplicationProvider {...eva} theme={{...evaTheme, ...customTheme}}>
+     <SafeAreaProvider>
       <IconRegistry icons ={EvaIconsPack} />
       <SideMenuProvider>
         <NavigationContainer>
@@ -42,6 +44,7 @@ export default function App() {
           <SideMenu />
         </NavigationContainer>
         </SideMenuProvider>
+       </SafeAreaProvider>
     </ApplicationProvider>
   );
 }
