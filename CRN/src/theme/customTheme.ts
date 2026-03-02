@@ -31,7 +31,7 @@ export const lightTheme = {
 	'color-primary-300': '#A8A8A8',
 	'color-primary-400': '#6F6F6F',
 	'color-primary-500': '#FFD14C',
-	'color-primary-600': '#111111',
+	'color-primary-600': '#C9971E',
 	'color-primary-700': '#1A1A1A',
 	'color-primary-800': '#222222',
 	'color-primary-900': '#2B2B2B',
