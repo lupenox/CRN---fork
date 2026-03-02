@@ -91,7 +91,7 @@ export default function Account(){
 	}
 
 	return(
-		<Layout style={{flex: 1}}>
+		<Layout level="2" style={{flex: 1}}>
 			<Card style={styles.card}>
 
 				{/*

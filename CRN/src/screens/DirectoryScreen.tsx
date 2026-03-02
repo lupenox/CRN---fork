@@ -6,7 +6,7 @@ import { mockResources } from '../data/mockData';
 export default function DirectoryScreen({ navigation }) {
 
   return (
-    <Layout style={{ flex: 1, padding: 16 }}>
+    <Layout level="2" style={{ flex: 1, padding: 16 }}>
       <ScrollView contentContainerStyle={{ gap: 12 }}>
         {mockResources.map(event => (
           <Card
