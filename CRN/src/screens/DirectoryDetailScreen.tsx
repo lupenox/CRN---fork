@@ -34,7 +34,7 @@ export default function DirectoryDetailScreen({ route, navigation })
         );
     }
     return (
-        <Layout style={{ flex: 1, padding: 16 }}>
+        <Layout level="2" style={{ flex: 1, padding: 16 }}>
             <ScrollView>
                 <Card style={{ paddingVertical: 12 }}>
                 <Text category="h5" style={{ marginBottom: 6 }}>{event.title}</Text>

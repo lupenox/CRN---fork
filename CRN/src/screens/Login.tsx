@@ -8,7 +8,7 @@ export default function Login({ navigation }: { navigation: any }) {
 	const [password, setPassword] = useState('');
 
 	return (
-		<Layout style={styles.container}>
+		<Layout level="2" style={styles.container}>
 			<Card style={styles.card}>
 				<Text category='h5' style={styles.title}>Campus Resource Navigator</Text>
 				<Input

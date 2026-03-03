@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { View, TouchableOpacity, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Layout, Text, Button, Divider } from '@ui-kitten/components';
 import { Icon } from '@ui-kitten/components';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +9,7 @@ import { SideMenuContext } from './SideMenuContext';
 export default function SideMenu() {
   const { isOpen, closeMenu } = useContext(SideMenuContext);
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   if (!isOpen) return null;
 
@@ -28,13 +30,13 @@ export default function SideMenu() {
         flexDirection: 'row'
       }}
     >
-      <Layout style={{ width: PANEL_WIDTH, height: '100%', padding: 18 }}>
+      <Layout level="2" style={{ width: PANEL_WIDTH, height: '100%', padding: 18 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text category="h6">Menu</Text>
+          <Text category="h5">Menu</Text>
 
           {/* Account Icon */}
           <TouchableOpacity onPress={() => goTo('Account')}>
-            <Icon name="person-outline" style={{ width: 28, height: 28}} fill="#222B45"/>
+            <Icon name="person-outline" style={{ width: 28, height: 28, padding: 18, paddingTop: insets.top + 18}} fill="#222B45"/>
           </TouchableOpacity>
         </View>
 
