@@ -6,6 +6,9 @@ await sql`
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
         password_hash VARCHAR(255) NOT NULL
     );
 `;
@@ -15,13 +18,13 @@ if (!JWT_SECRET) {
     throw new Error("JWT_SECRET environment variable is not set");
 }
 
-export async function createUser(email: string, password: string): Promise<boolean> {
+export async function createUser(email: string, password: string, username: string, first_name: string, last_name: string): Promise<boolean> {
     try {
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
         await sql`
-            INSERT INTO users (email, password_hash) 
-            VALUES (${email}, ${hash});
+            INSERT INTO users (email, password_hash, username, first_name, last_name) 
+            VALUES (${email}, ${hash}, ${username}, ${first_name}, ${last_name});
         `;
         return true;
     } catch (err) {
