@@ -15,7 +15,7 @@ export const lightTheme = {
 	// Basic
 	'color-basic-100': '#FFF',
 	'color-basic-200': '#CCC',
-	'color-basic-300': '#EDEDED',
+	'color-basic-300': '#454444',
 	'color-basic-400': '#DADADA',
 	'color-basic-500': '#B0B0B0',
 	'color-basic-600': '#7A7A7A',
