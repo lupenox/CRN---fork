@@ -9,7 +9,7 @@ export default function SignUp({ navigation }: { navigation: any }) {
 	const [confirmPassword, setConfirmPassword] = useState('');
 
 	return (
-		<Layout style={styles.container}>
+		<Layout level="2" style={styles.container}>
 			<Card style={styles.card}>
 				<Text category='h5' style={styles.title}>Create Account</Text>
 				<Input
