@@ -19,6 +19,7 @@ import SignUp from './src/screens/SignUp.tsx';
 import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
 import SideMenu from './src/navigation/SideMenu.tsx';
 import MenuButton from './src/navigation/MenuButton';
+import Map from './src/screens/Map.tsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -40,6 +41,7 @@ export default function App() {
             <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
             <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
             <Stack.Screen name="Account" component={Account} />
+            <Stack.Screen name="Map" component={Map} />
           </Stack.Navigator>
           <SideMenu />
         </NavigationContainer>
