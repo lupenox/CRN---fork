@@ -2,28 +2,11 @@ import React, { useLayoutEffect, useContext } from 'react';
 import { Layout, Text, Card, Divider, Button, Icon } from '@ui-kitten/components';
 import { ScrollView, Linking, TouchableOpacity } from 'react-native';
 import { SideMenuContext } from '../navigation/SideMenuContext';
+import { AppHeader } from '../navigation/AppHeader';
 
 export default function DirectoryDetailScreen({ route, navigation })
 {
     const { event } = route.params ?? {};
-    const { closeMenu } = useContext(SideMenuContext);
-
-    useLayoutEffect(() =>
-    {
-        navigation.setOptions({ title: event?.title ?? 'Detail',
-            headerLeft: () => (
-                <TouchableOpacity
-                    onPress={() => {
-                        closeMenu();
-                        navigation.goBack();
-                    }}
-                    style={{ paddingHorizontal: 12 }}
-                >
-                    <Icon name="arrow-back" style={{width: 24, height: 24}} />
-                </TouchableOpacity>
-            ),
-        });
-    }, [navigation, event]);
 
     if(!event)
     {
@@ -34,7 +17,8 @@ export default function DirectoryDetailScreen({ route, navigation })
         );
     }
     return (
-        <Layout level="2" style={{ flex: 1, padding: 16 }}>
+        <Layout level="2" style={{ flex: 1 }}>
+          <AppHeader title={event.title} showBack={true} />
             <ScrollView>
                 <Card style={{ paddingVertical: 12 }}>
                 <Text category="h5" style={{ marginBottom: 6 }}>{event.title}</Text>

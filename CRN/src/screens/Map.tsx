@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Layout } from '@ui-kitten/components'
 import { StyleSheet } from 'react-native';
 import MapView, { Marker, MapMarker } from 'react-native-maps';
+import { AppHeader } from '../navigation/AppHeader';
 
 import * as Location from 'expo-location';
 
@@ -62,6 +63,7 @@ export default function Map(){
 
 	return(
 		<Layout style={styles.layout}>
+		  <AppHeader title="Event Map" />
 			<MapView
 				ref={mapRef}	
 				style={styles.map}

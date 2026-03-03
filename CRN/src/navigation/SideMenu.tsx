@@ -33,11 +33,6 @@ export default function SideMenu() {
       <Layout level="2" style={{ width: PANEL_WIDTH, height: '100%', padding: 18 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <Text category="h5">Menu</Text>
-
-          {/* Account Icon */}
-          <TouchableOpacity onPress={() => goTo('Account')}>
-            <Icon name="person-outline" style={{ width: 28, height: 28, padding: 18, paddingTop: insets.top + 18}} fill="#222B45"/>
-          </TouchableOpacity>
         </View>
 
 
