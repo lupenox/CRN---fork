@@ -13,6 +13,7 @@ import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
 import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen.tsx';
 import Account from './src/screens/Account.tsx';
 import Login from './src/screens/Login.tsx';
+import SignUp from './src/screens/SignUp.tsx';
 
 import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
 import SideMenu from './src/navigation/SideMenu.tsx';
@@ -29,12 +30,13 @@ export default function App() {
 
   return (
     <ApplicationProvider {...eva} theme={{...evaTheme, ...customTheme}}>
-     <IconRegistry icons ={EvaIconsPack} />
+      <IconRegistry icons ={EvaIconsPack} />
       <SideMenuProvider>
-       <NavigationContainer>
-         <Stack.Navigator screenOptions={{ headerLeft: () => <MenuButton/>, }}>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerLeft: () => <MenuButton/>, }}>
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
             <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
+            <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
             <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
             <Stack.Screen name="Account" component={Account} />
             <Stack.Screen name="Map" component={Map} />
