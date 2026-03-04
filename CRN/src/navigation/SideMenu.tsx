@@ -30,23 +30,18 @@ export default function SideMenu() {
         flexDirection: 'row'
       }}
     >
-      <Layout level="2" style={{ width: PANEL_WIDTH, height: '100%', padding: 18 }}>
+      <Layout level="3" style={{ width: PANEL_WIDTH, height: '100%', padding: 18 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text category="h5">Menu</Text>
-
-          {/* Account Icon */}
-          <TouchableOpacity onPress={() => goTo('Account')}>
-            <Icon name="person-outline" style={{ width: 28, height: 28, padding: 18, paddingTop: insets.top + 18}} fill="#222B45"/>
-          </TouchableOpacity>
+          <Text category="h5" style={{ color: '#FFFFFF' }}>Menu</Text>
         </View>
 
 
         <Divider style={{ marginVertical: 10 }} />
 
-        <Button appearance="ghost" onPress={() => goTo('Directory')}>
+        <Button appearance="ghost" size="giant" onPress={() => goTo('Directory')}>
           Directory
         </Button>
-        <Button appearance="ghost" onPress={() => goTo('Map')}>
+        <Button appearance="ghost" size="giant" onPress={() => goTo('Map')}>
           Map
         </Button>
 

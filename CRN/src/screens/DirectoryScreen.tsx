@@ -1,12 +1,14 @@
 import React from 'react';
 import { Layout, Text, Card } from '@ui-kitten/components';
 import { ScrollView } from 'react-native';
+import { AppHeader } from '../navigation/AppHeader';
 import { mockResources } from '../data/mockData';
 
 export default function DirectoryScreen({ navigation }) {
 
   return (
-    <Layout level="2" style={{ flex: 1, padding: 16 }}>
+    <Layout level="2" style={{ flex: 1 }}>
+     <AppHeader title="Directory of UWM Resources" />
       <ScrollView contentContainerStyle={{ gap: 12 }}>
         {mockResources.map(event => (
           <Card

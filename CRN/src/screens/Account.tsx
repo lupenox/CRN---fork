@@ -9,6 +9,7 @@ import {
 	Layout,
 } from '@ui-kitten/components';
 
+import { AppHeader } from '../navigation/AppHeader';
 import {useState} from 'react';
 import { StyleSheet } from 'react-native';
 
@@ -92,6 +93,7 @@ export default function Account(){
 
 	return(
 		<Layout level="2" style={{flex: 1}}>
+		  <AppHeader title="Account" />
 			<Card style={styles.card}>
 
 				{/*

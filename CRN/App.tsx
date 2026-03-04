@@ -30,19 +30,19 @@ export default function App() {
 	const customTheme = systemTheme === 'dark'? darkTheme : lightTheme;
 
   return (
-    <ApplicationProvider {...eva} theme={{...evaTheme, ...customTheme}}>
+    <ApplicationProvider {...eva} theme={{ ...evaTheme, ...customTheme }}>
      <SafeAreaProvider>
       <IconRegistry icons ={EvaIconsPack} />
       <SideMenuProvider>
         <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerLeft: () => <MenuButton/>, }}>
-            <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-            <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
-            <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
-            <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
-            <Stack.Screen name="Account" component={Account} />
-            <Stack.Screen name="Map" component={Map} />
-          </Stack.Navigator>
+            <Stack.Navigator screenOptions={{ headerShown: false}}>
+                <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+                <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
+                <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
+                <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
+                <Stack.Screen name="Account" component={Account} />
+                <Stack.Screen name="Map" component={Map} />
+            </Stack.Navigator>
           <SideMenu />
         </NavigationContainer>
         </SideMenuProvider>
