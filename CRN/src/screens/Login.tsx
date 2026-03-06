@@ -28,7 +28,7 @@ export default function Login({ navigation }: { navigation: any }) {
 				/>
 				<Button
 					style={styles.btn}
-					onPress={() => navigation.replace('Directory')}
+					onPress={() => navigation.replace('Home')}
 				>
 					Login
 				</Button>

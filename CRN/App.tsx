@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ApplicationProvider, Button, Layout, Text, IconRegistry } from '@ui-kitten/components';
+import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 
@@ -18,8 +18,8 @@ import SignUp from './src/screens/SignUp.tsx';
 
 import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
 import SideMenu from './src/navigation/SideMenu.tsx';
-import MenuButton from './src/navigation/MenuButton';
 import Map from './src/screens/Map.tsx';
+import Home from './src/screens/Home.tsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,12 +36,13 @@ export default function App() {
       <SideMenuProvider>
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false}}>
-                <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-                <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
-                <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
-                <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
-                <Stack.Screen name="Account" component={Account} />
-                <Stack.Screen name="Map" component={Map} />
+                <Stack.Screen name="Login"            component={Login}                 />
+                <Stack.Screen name="Home"             component={Home}                  />
+                <Stack.Screen name="Directory"        component={DirectoryScreen}       />
+                <Stack.Screen name="SignUp"           component={SignUp}                />
+                <Stack.Screen name="DirectoryDetail"  component={DirectoryDetailScreen} />
+                <Stack.Screen name="Account"          component={Account}               />
+                <Stack.Screen name="Map"              component={Map}                   />
             </Stack.Navigator>
           <SideMenu />
         </NavigationContainer>
