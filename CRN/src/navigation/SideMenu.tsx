@@ -38,11 +38,14 @@ export default function SideMenu() {
 
         <Divider style={{ marginVertical: 10 }} />
 
-        <Button appearance="ghost" size="giant" onPress={() => goTo('Directory')}>
-          Directory
+        <Button appearance="ghost" size="giant" onPress={() => goTo('Home')}>
+          Home
         </Button>
         <Button appearance="ghost" size="giant" onPress={() => goTo('Map')}>
           Map
+        </Button>
+        <Button appearance="ghost" size="giant" onPress={() => goTo('Directory')}>
+          Directory
         </Button>
 
         {/* add more items as needed */}
