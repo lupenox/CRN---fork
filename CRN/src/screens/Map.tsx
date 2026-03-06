@@ -8,11 +8,14 @@ import { mockResources } from '../data/mockData';
 
 import * as Location from 'expo-location';
 
-export default function Map(){
+export default function Map({ route }: any){
 
 	const mapRef = useRef<MapView>(null);
+	const markerRefs = useRef<{[key: number]: any}>({});
 	const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 	const [location, setLocation] = useState<Location.LocationObject | null>(null);
+
+    const { targetLocation } = route.params ?? {};
 
 	useEffect(()=>{
 		async function startTracking(){
@@ -26,8 +29,26 @@ export default function Map(){
 				}, (loc)=> setLocation(loc));
 		}
 		startTracking();
+		if (targetLocation && mapRef.current) {
+             mapRef.current.animateCamera({
+                 center: {
+                     latitude: targetLocation.lat,
+                     longitude: targetLocation.lng,
+                 },
+                     zoom: 17
+                 });
+             }
 		return ()=>{ subscriptionRef.current?.remove(); };
 	}, [])
+
+    useEffect(() => {
+        if (targetLocation?.id && markerRefs.current[targetLocation.id]) {
+            const timer = setTimeout(() => {
+                markerRefs.current[targetLocation.id].showCallout();
+            }, 600);
+            return () => clearTimeout(timer);
+        }
+    }, [targetLocation?.id]);
 
 	function recenterMap(){
 		if(location && mapRef.current){
@@ -54,6 +75,9 @@ export default function Map(){
 		longitudeDelta: 0.01,
 	};
 
+    const initialLat = targetLocation?.lat ?? locationInfo.latitude; //Target or Milwaukee
+    const initialLng = targetLocation?.lng ?? locationInfo.longitude;
+
 	return(
 		<Layout style={styles.layout}>
 		  <AppHeader title="Event Map" />
@@ -62,8 +86,8 @@ export default function Map(){
 					ref={mapRef}	
 					style={styles.map}
 					initialRegion={{
-						latitude: locationInfo.latitude,
-						longitude: locationInfo.longitude,
+						latitude: initialLat,
+						longitude: initialLng,
 						latitudeDelta: locationInfo.latitudeDelta,
 						longitudeDelta: locationInfo.longitudeDelta,
 					}}
@@ -77,14 +101,21 @@ export default function Map(){
 							title='You'
 						/>
 					)}
-					{mockResources.map(resource => (
-						<Marker
-							key={resource.id}
-							coordinate={{ latitude: resource.lat, longitude: resource.lng }}
-							title={resource.title}
-							description={resource.location}
-						/>
-					))}
+                    {mockResources.map(resource => {
+                            // Check if this specific resource is the one we navigated to
+                        const isTarget = targetLocation?.lat === resource.lat && targetLocation?.lng === resource.lng;
+
+                        return (
+                            <Marker
+                                key={resource.id}
+                                ref={(el) => (markerRefs.current[resource.id] = el)}
+                                coordinate={{ latitude: resource.lat, longitude: resource.lng }}
+                                title={resource.title}
+                                description={resource.location}
+                                pinColor={isTarget ? 'gold' : 'red'}
+                            />
+                        );
+                    })}
 				</MapView>
 				{location && (
 					<Button
