@@ -11,6 +11,7 @@ import * as Location from 'expo-location';
 export default function Map({ route }: any){
 
 	const mapRef = useRef<MapView>(null);
+	const markerRefs = useRef<{[key: number]: any}>({});
 	const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 	const [location, setLocation] = useState<Location.LocationObject | null>(null);
 
@@ -39,6 +40,15 @@ export default function Map({ route }: any){
              }
 		return ()=>{ subscriptionRef.current?.remove(); };
 	}, [])
+
+    useEffect(() => {
+        if (targetLocation?.id && markerRefs.current[targetLocation.id]) {
+            const timer = setTimeout(() => {
+                markerRefs.current[targetLocation.id].showCallout();
+            }, 600);
+            return () => clearTimeout(timer);
+        }
+    }, [targetLocation?.id]);
 
 	function recenterMap(){
 		if(location && mapRef.current){
@@ -91,16 +101,21 @@ export default function Map({ route }: any){
 							title='You'
 						/>
 					)}
-					{mockResources.map(resource => (
-						<Marker
-							key={resource.id}
-							coordinate={{ latitude: resource.lat, longitude: resource.lng }}
-							title={resource.title}
-							description={resource.location}
-							// Highlight if target found
-							pinColor={targetLocation?.lat === resource.lat ? 'gold' : 'red'}
-						/>
-					))}
+                    {mockResources.map(resource => {
+                            // Check if this specific resource is the one we navigated to
+                        const isTarget = targetLocation?.lat === resource.lat && targetLocation?.lng === resource.lng;
+
+                        return (
+                            <Marker
+                                key={resource.id}
+                                ref={(el) => (markerRefs.current[resource.id] = el)}
+                                coordinate={{ latitude: resource.lat, longitude: resource.lng }}
+                                title={resource.title}
+                                description={resource.location}
+                                pinColor={isTarget ? 'gold' : 'red'}
+                            />
+                        );
+                    })}
 				</MapView>
 				{location && (
 					<Button
