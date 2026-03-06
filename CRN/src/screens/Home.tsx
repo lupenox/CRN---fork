@@ -1,11 +1,20 @@
-import React from 'react';
+//screens/Home.tsx
 
+import React from 'react';
 import { AppHeader } from '../navigation/AppHeader.tsx';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, Layout } from '@ui-kitten/components';
 import { mockResources } from '../data/mockData';
-import { ScrollView } from 'react-native';
 
+/**
+ * 
+ * @Note Landing page for the application after
+ * logging in. Displays last used resources
+ * 
+ * @TODO Current implementation shows the top 5
+ * resources from our mock. Change to use last searched
+ * metadata from user
+ */
 export default function Home({ navigation }){
     const top5Resources = mockResources.slice(0,5);
     return (
