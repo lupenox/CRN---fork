@@ -34,10 +34,10 @@ export default function DirectoryDetailScreen({ route, navigation })
                 </Button>
                 {event.lat && event.lng && (
                     <Button
-                        //status="info"
                         style={{ marginTop: 12 }}
                         onPress={() => navigation.navigate('Map', {
                             targetLocation: {
+                                id: event.id,
                                 lat: event.lat,
                                 lng: event.lng,
                                 title: event.title
