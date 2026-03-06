@@ -32,6 +32,21 @@ export default function DirectoryDetailScreen({ route, navigation })
                 <Button onPress={() => Linking.openURL(event.website)} style={{ marginTop: 12 }}>
                     Open Website
                 </Button>
+                {event.lat && event.lng && (
+                    <Button
+                        //status="info"
+                        style={{ marginTop: 12 }}
+                        onPress={() => navigation.navigate('Map', {
+                            targetLocation: {
+                                lat: event.lat,
+                                lng: event.lng,
+                                title: event.title
+                            }
+                        })}
+                    >
+                        View on Map
+                    </Button>
+                )}
                 </Card>
             </ScrollView>
             </Layout>

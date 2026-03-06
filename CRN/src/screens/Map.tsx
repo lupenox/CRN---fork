@@ -8,11 +8,13 @@ import { mockResources } from '../data/mockData';
 
 import * as Location from 'expo-location';
 
-export default function Map(){
+export default function Map({ route }: any){
 
 	const mapRef = useRef<MapView>(null);
 	const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 	const [location, setLocation] = useState<Location.LocationObject | null>(null);
+
+    const { targetLocation } = route.params ?? {};
 
 	useEffect(()=>{
 		async function startTracking(){
@@ -26,6 +28,15 @@ export default function Map(){
 				}, (loc)=> setLocation(loc));
 		}
 		startTracking();
+		if (targetLocation && mapRef.current) {
+             mapRef.current.animateCamera({
+                 center: {
+                     latitude: targetLocation.lat,
+                     longitude: targetLocation.lng,
+                 },
+                     zoom: 17
+                 });
+             }
 		return ()=>{ subscriptionRef.current?.remove(); };
 	}, [])
 
@@ -54,6 +65,9 @@ export default function Map(){
 		longitudeDelta: 0.01,
 	};
 
+    const initialLat = targetLocation?.lat ?? locationInfo.latitude; //Target or Milwaukee
+    const initialLng = targetLocation?.lng ?? locationInfo.longitude;
+
 	return(
 		<Layout style={styles.layout}>
 		  <AppHeader title="Event Map" />
@@ -62,8 +76,8 @@ export default function Map(){
 					ref={mapRef}	
 					style={styles.map}
 					initialRegion={{
-						latitude: locationInfo.latitude,
-						longitude: locationInfo.longitude,
+						latitude: initialLat,
+						longitude: initialLng,
 						latitudeDelta: locationInfo.latitudeDelta,
 						longitudeDelta: locationInfo.longitudeDelta,
 					}}
@@ -83,6 +97,8 @@ export default function Map(){
 							coordinate={{ latitude: resource.lat, longitude: resource.lng }}
 							title={resource.title}
 							description={resource.location}
+							// Highlight if target found
+							pinColor={targetLocation?.lat === resource.lat ? 'gold' : 'red'}
 						/>
 					))}
 				</MapView>
