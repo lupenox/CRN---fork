@@ -67,10 +67,6 @@ export async function postDynamicData(
         }
     }
 
-    if(records['id'] == null && id != null) {
-        records['id'] = '' + id;
-    }
-
     let result;
     try {
         if(id != null) {
