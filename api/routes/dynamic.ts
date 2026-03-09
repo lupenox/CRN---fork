@@ -18,10 +18,10 @@ export async function GET(req : Request) {
 
     let result;
     try {
-        if(id == null || !Number.isInteger(id)) {
-            result = await getDynamicData(table);
-        } else {
+        if(Number.isInteger(id)) {
             result = await getDynamicData(table, id);
+        } else {
+            result = await getDynamicData(table);
         }
     } catch {
         return CrnResponse(
