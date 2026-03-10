@@ -1,6 +1,7 @@
 import { getEvents, deleteEvent, createEvent, CrnEvent, updateEvent } from "../util/events.ts";
 import CrnResponse from "../util/httpResponse.ts";
 import parseJson from "../util/parseJson.ts";
+import { verifyAuth0Token } from "../util/auth0.ts";
 
 export async function GET(req : Request) {
     const url = new URL(req.url);
@@ -13,23 +14,23 @@ export async function GET(req : Request) {
     }
 }
 
-export async function DELETE(req : Request) {
+export async function DELETE(req: Request) {
     const url = new URL(req.url);
-    const id = url.searchParams.get("id");
-    if (!id) {
-        return CrnResponse(
-            null, 
-            'Event ID is required',
-            {
-                status: 400
-            }
-        );
+    const eventId = url.searchParams.get("id");
+
+    if (!eventId) return CrnResponse(null, 'Event ID is required', { status: 400 });
+
+    // PROTECTED ROUTE: Verify the Auth0 Token
+    const user = await verifyAuth0Token(req);
+    if (!user) {
+        return CrnResponse(null, "Unauthorized: Invalid or missing token", { status: 401 });
     }
+
     try {
-        const deletedEvent = await deleteEvent(id);
+        const deletedEvent = await deleteEvent(eventId);
         return CrnResponse(deletedEvent);
     } catch (err) {
-        return CrnResponse(null, String(err));
+        return CrnResponse(null, String(err), { status: 500 });
     }
 }
 
