@@ -3,9 +3,9 @@
 import React from 'react';
 import { AppHeader } from '../navigation/AppHeader.tsx';
 import { StyleSheet, ScrollView } from 'react-native';
-import { Text, Layout } from '@ui-kitten/components';
+import { Text, Layout, Card } from '@ui-kitten/components';
 import { mockResources } from '../data/mockData';
-import Card from '../components/Card';
+import AniCard from '../components/Card';
 
 /**
  * 
@@ -26,14 +26,14 @@ export default function Home({ navigation }){
                 <Text category='h3' style={styles.title}>Campus Resource Navigator</Text>
                 <Text category='h5' >Last Searched</Text>
                     {top5Resources.map(event => (
-                        <Card
+                        <AniCard
                             key={event.id}
                             style={{ width: '100%', paddingVertical: 12 }}
                             onPress={() => navigation.navigate('DirectoryDetail', { event })}
                         >
                             <Text category="s1" style={{ marginBottom: 4 }}>{event.title}</Text>
                             <Text appearance="hint" style={{ marginBottom: 8 }}>{event.location}</Text>
-                        </Card>
+                        </AniCard>
                     ))}
                 </ScrollView>
             </Card>
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	card: {
-		height: '80%',
+		height: '90%',
 		width: '100%',
 		padding: 10,
 	},

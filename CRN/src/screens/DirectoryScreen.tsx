@@ -42,8 +42,7 @@ export default function DirectoryScreen({ navigation }) {
 
   return (
     <Layout level="2" style={{ flex: 1 }}>
-      <AppHeader title="Directory of UWM Resources" />
-
+      <AppHeader title="Resources" />
       <Layout style={styles.searchRow} level="1">
         <Input
           placeholder="Search resources..."

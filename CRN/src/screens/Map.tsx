@@ -82,7 +82,7 @@ export default function Map({ route }: any){
 
    return(
       <Layout style={styles.layout}>
-        <AppHeader title="Event Map" />
+        <AppHeader title="Map" />
          <View style={styles.mapContainer}>
             <MapView
                ref={mapRef}
