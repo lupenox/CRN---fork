@@ -7,7 +7,7 @@ export default function AnimatedButton(props: ButtonProps) {
 
   const pressIn = () => {
     Animated.spring(scale, {
-      toValue: 0.90,
+      toValue: 0.93,
       useNativeDriver: true,
     }).start();
   };
