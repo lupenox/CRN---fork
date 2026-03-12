@@ -1,10 +1,10 @@
-
 import { useEffect, useRef, useState } from 'react';
-import { Layout, Button, Icon } from '@ui-kitten/components'
+import { Layout, Icon } from '@ui-kitten/components'
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { AppHeader } from '../navigation/AppHeader';
 import { mockResources } from '../data/mockData';
+import Button from '../components/Button';
 
 import * as Location from 'expo-location';
 

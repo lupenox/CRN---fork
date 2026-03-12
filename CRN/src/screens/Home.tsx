@@ -3,8 +3,9 @@
 import React from 'react';
 import { AppHeader } from '../navigation/AppHeader.tsx';
 import { StyleSheet, ScrollView } from 'react-native';
-import { Text, Card, Layout } from '@ui-kitten/components';
+import { Text, Layout } from '@ui-kitten/components';
 import { mockResources } from '../data/mockData';
+import Card from '../components/Card';
 
 /**
  * 

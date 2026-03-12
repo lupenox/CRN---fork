@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { View, TouchableOpacity, Dimensions, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Layout, Text, Button, Divider, Icon } from '@ui-kitten/components';
+import { Layout, Text, Divider, Icon } from '@ui-kitten/components';
 import { useNavigation } from '@react-navigation/native';
 import { SideMenuContext } from './SideMenuContext';
+import Button from '../components/Button';
 
 const NAV_ITEMS = [
   { label: 'Home',      route: 'Home',      icon: 'home-outline'   },
   { label: 'Map',       route: 'Map',       icon: 'map-outline'    },
-  { label: 'Directory', route: 'Directory', icon: 'book-outline' },
+  { label: 'Directory', route: 'Directory', icon: 'book-outline'   },
 ];
 
 const NavIcon = (name) => (props) => <Icon {...props} name={name} />;

@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Layout, Text, Card, Input, Icon, OverflowMenu, MenuItem, Button } from '@ui-kitten/components';
+import { Layout, Text, Input, Icon, OverflowMenu, MenuItem } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
 import { mockResources } from '../data/mockData';
 import { ScrollView } from 'react-native';
+import Button from '../components/Button';
+import Card from '../components/Card';
 
 export default function DirectoryScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');

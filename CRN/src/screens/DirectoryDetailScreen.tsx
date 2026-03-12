@@ -1,8 +1,9 @@
 import React, { useLayoutEffect, useContext } from 'react';
-import { Layout, Text, Card, Divider, Button, Icon } from '@ui-kitten/components';
+import { Layout, Text, Card, Divider, Icon } from '@ui-kitten/components';
 import { ScrollView, Linking, TouchableOpacity } from 'react-native';
 import { SideMenuContext } from '../navigation/SideMenuContext';
 import { AppHeader } from '../navigation/AppHeader';
+import Button from '../components/Button';
 
 export default function DirectoryDetailScreen({ route, navigation })
 {

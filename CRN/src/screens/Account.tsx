@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
 	Card,
-	Button,
 	Input,
 	Avatar,
 	Divider,
@@ -9,6 +8,7 @@ import {
 	Layout,
 } from '@ui-kitten/components';
 
+import Button from '../components/Button';
 import { AppHeader } from '../navigation/AppHeader';
 import {useState} from 'react';
 import { StyleSheet } from 'react-native';
