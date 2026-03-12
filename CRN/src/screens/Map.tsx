@@ -71,7 +71,7 @@ export default function Map({ route }: any){
 		longitude: defaultLocation.longitude,
 
 		//deltas control the zoom on the map
-		latitudeDelta: 0.01, 
+		latitudeDelta: 0.01,
 		longitudeDelta: 0.01,
 	};
 
@@ -83,7 +83,7 @@ export default function Map({ route }: any){
 		  <AppHeader title="Event Map" />
 			<View style={styles.mapContainer}>
 				<MapView
-					ref={mapRef}	
+					ref={mapRef}
 					style={styles.map}
 					initialRegion={{
 						latitude: initialLat,

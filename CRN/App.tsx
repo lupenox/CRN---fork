@@ -12,14 +12,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
 import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen.tsx';
-import Account from './src/screens/AccountScreen.tsx';
-import Login from './src/screens/LoginScreen.tsx';
-import SignUp from './src/screens/SignUpScreen.tsx';
+import Account from './src/screens/Account.tsx';
+import Login from './src/screens/Login.tsx';
+import SignUp from './src/screens/SignUp.tsx';
 
 import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
 import SideMenu from './src/navigation/SideMenu.tsx';
-import Map from './src/screens/MapScreen.tsx';
-import Home from './src/screens/HomeScreen.tsx';
+import Map from './src/screens/Map.tsx';
+import Home from './src/screens/Home.tsx';
 
 const Stack = createNativeStackNavigator();
 
