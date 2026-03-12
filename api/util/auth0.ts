@@ -23,11 +23,14 @@ export async function verifyAuth0Token(req: Request) {
             audience: AUDIENCE,
         });
         
-        // --- NEW: Sync the user to your local database ---
-        if (payload.sub && typeof payload.email === 'string') {
-            // payload.sub is the Auth0 ID. 
-            // payload.nickname is often where Auth0 stores the username.
-            await syncAuth0User(payload.sub, payload.email, payload.nickname as string);
+        // --- UPDATED: Read the Namespaced Custom Claims ---
+        const namespace = "https://api.crn.uwm.edu";
+        const userEmail = payload[`${namespace}/email`] as string | undefined;
+        const userName = payload[`${namespace}/username`] as string | undefined;
+
+        if (payload.sub && userEmail) {
+            // It found the email! Now it will ACTUALLY sync to the database.
+            await syncAuth0User(payload.sub, userEmail, userName);
         }
         // -------------------------------------------------
 

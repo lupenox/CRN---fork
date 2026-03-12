@@ -4,6 +4,11 @@ import parseJson from "../util/parseJson.ts";
 import { verifyAuth0Token } from "../util/auth0.ts";
 
 export async function GET(req : Request) {
+    // PROTECTED ROUTE: Verify the Auth0 Token
+    const user = await verifyAuth0Token(req);
+    if (!user) {
+        return CrnResponse(null, "Unauthorized: Invalid or missing token", { status: 401 });
+    }
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     try {
@@ -35,6 +40,12 @@ export async function DELETE(req: Request) {
 }
 
 export async function POST(req : Request) {
+    // PROTECTED ROUTE: Verify the Auth0 Token
+    const user = await verifyAuth0Token(req);
+    if (!user) {
+        return CrnResponse(null, "Unauthorized: Invalid or missing token", { status: 401 });
+    }
+
     const text = await req.text();
     let event : CrnEvent;
     try {
@@ -78,6 +89,12 @@ export async function PATCH(req : Request) {
         );
     }
 
+    // PROTECTED ROUTE: Verify the Auth0 Token
+    const user = await verifyAuth0Token(req);
+    if (!user) {
+        return CrnResponse(null, "Unauthorized: Invalid or missing token", { status: 401 });
+    }
+    
     let obj : Record<string, string>;
     try {
         obj = JSON.parse(
