@@ -19,7 +19,7 @@ export default function DirectoryDetailScreen({ route, navigation })
     }
     return (
         <Layout level="2" style={{ flex: 1 }}>
-            <AppHeader title="Location Details" showBack={true} />
+            <AppHeader title="About Resource" showBack={true} />
             <ScrollView>
                 <Card style={{ paddingVertical: 12 }}>
                 <Text category="h5" style={{ marginBottom: 6 }}>{event.title}</Text>
