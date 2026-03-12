@@ -29,11 +29,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins":[
+      [
       "react-native-auth0",
       {
         "domain": "dev-85gf7oggpaitwy0i.us.auth0.com",
         "customScheme": "crnapp"
       }
+      ]
     ]
   }
 }
