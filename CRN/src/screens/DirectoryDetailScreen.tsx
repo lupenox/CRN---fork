@@ -1,8 +1,9 @@
 import React, { useLayoutEffect, useContext } from 'react';
-import { Layout, Text, Card, Divider, Button, Icon } from '@ui-kitten/components';
+import { Layout, Text, Card, Divider, Icon } from '@ui-kitten/components';
 import { ScrollView, Linking, TouchableOpacity } from 'react-native';
 import { SideMenuContext } from '../navigation/SideMenuContext';
 import { AppHeader } from '../navigation/AppHeader';
+import Button from '../components/Button';
 
 export default function DirectoryDetailScreen({ route, navigation })
 {
@@ -18,7 +19,7 @@ export default function DirectoryDetailScreen({ route, navigation })
     }
     return (
         <Layout level="2" style={{ flex: 1 }}>
-          <AppHeader title={event.title} showBack={true} />
+            <AppHeader title="About Resource" showBack={true} />
             <ScrollView>
                 <Card style={{ paddingVertical: 12 }}>
                 <Text category="h5" style={{ marginBottom: 6 }}>{event.title}</Text>

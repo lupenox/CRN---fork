@@ -1,7 +1,8 @@
 import React from 'react';
-import { Layout, Card, Input, Button, Text } from '@ui-kitten/components';
+import { Layout, Card, Input, Text } from '@ui-kitten/components';
 import { StyleSheet } from 'react-native';
 import { useState } from 'react';
+import Button from '../components/Button';
 
 export default function Login({ navigation }: { navigation: any }) {
 	const [email, setEmail] = useState('');
