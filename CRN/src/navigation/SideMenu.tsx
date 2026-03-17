@@ -10,7 +10,8 @@ const NAV_ITEMS = [
   { label: 'Home',      route: 'Home',      icon: 'home-outline'   },
   { label: 'Map',       route: 'Map',       icon: 'map-outline'    },
   { label: 'Directory', route: 'Directory', icon: 'book-outline'   },
-];
+  { label: 'My Classes',route: 'Classes',  icon: 'award-outline'    },
+  ];
 
 const NavIcon = (name) => (props) => <Icon {...props} name={name} />;
 
