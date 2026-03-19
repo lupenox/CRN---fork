@@ -4,7 +4,6 @@ import { StyleSheet } from 'react-native';
 import Button from '../components/Button';
 
 export default function SignUp({ navigation }: { navigation: any }) {
-	const [name, setName] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
@@ -13,12 +12,6 @@ export default function SignUp({ navigation }: { navigation: any }) {
 		<Layout level="2" style={styles.container}>
 			<Card style={styles.card}>
 				<Text category='h5' style={styles.title}>Create Account</Text>
-				<Input
-					style={styles.input}
-					placeholder='Name'
-					value={name}
-					onChangeText={setName}
-				/>
 				<Input
 					style={styles.input}
 					placeholder='Email'
