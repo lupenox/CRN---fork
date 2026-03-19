@@ -87,3 +87,35 @@ export async function postDynamicData(
 
     return result;
 }
+
+
+/**
+ * Helper function to handle the deletion of an entry
+ * from the database
+ * @param table, name of table for entry to delete
+ * @param id of entry to delete 
+ * @returns delete result on success and null if it fails
+ * @throws if table is not allowed OR id is null
+ */
+export async function delDynamicData(
+    table : string,
+    id : number | null
+) : Promise<object | null> {
+    if(!isAllowedTable(table))
+        throw new Error('delDynamicData: Table is not in the allowlist');
+
+    let result;
+    try {
+        if(id == null)
+			throw new Error('delDynamicData: Need id to delete');
+
+		result = await sql`
+			DELETE FROM ${sql(table)} WHERE id = ${id};
+		`;
+    } catch(err) {
+        console.error(err);
+        return null;
+    }
+
+    return result;
+}
