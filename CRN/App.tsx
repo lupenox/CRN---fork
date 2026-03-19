@@ -22,10 +22,10 @@ import Account from './src/screens/Account.tsx';
 import Login from './src/screens/Login.tsx';
 import SignUp from './src/screens/SignUp.tsx';
 
-import MyClassesScreen    from './src/screens/MyClassesScreen';
-import ClassSearchScreen  from './src/screens/ClassSearchScreen';
-import ClassSectionsScreen from './src/screens/ClassSectionsScreen';
-import ClassDetailScreen  from './src/screens/ClassDetailScreen';
+import MyClassesScreen from './src/screens/MyClassesScreen.tsx';
+import ClassSearchScreen  from './src/screens/ClassSearchScreen.tsx';
+import ClassSectionsScreen from './src/screens/ClassSectionsScreen.tsx';
+import ClassDetailScreen  from './src/screens/ClassDetailScreen.tsx';
 
 import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
 import SideMenu from './src/navigation/SideMenu.tsx';
@@ -60,8 +60,7 @@ const RootNavigator = () => {
             <Stack.Screen name="Classes"          component={MyClassesScreen}     />
             <Stack.Screen name="ClassSearch"      component={ClassSearchScreen}     />
             <Stack.Screen name="ClassSections"    component={ClassSectionsScreen}   />
-                <Stack.Screen name="ClassDetail"      component={ClassDetailScreen}     />
-
+            <Stack.Screen name="ClassDetail"      component={ClassDetailScreen}     />
           </Stack.Navigator>
           <SideMenu />
         </>
