@@ -6,12 +6,18 @@ import {
 	Divider,
 	ButtonGroup,
 	Layout,
+	Toggle,
+	Text,
+	Icon,
+	TopNavigationAction,
 } from '@ui-kitten/components';
+
+import { useAppTheme } from '../theme/ThemeContext';
 
 import Button from '../components/Button';
 import { AppHeader } from '../navigation/AppHeader';
 import {useState} from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * Account Screen, provides details about a user's
@@ -35,6 +41,15 @@ export default function Account(){
 	 * @Note user object for modularity. Could be made global as
 	 * part of a session provider context, but largely out of scope.
 	 */
+	const { resolvedTheme, setMode } = useAppTheme();
+	const SunIcon  = (props) => <Icon {...props} name="sun-outline" />;
+    const MoonIcon = (props) => <Icon {...props} name="moon-outline" />;
+        const ThemeToggle = (
+          <TopNavigationAction
+            icon={resolvedTheme === 'dark' ? SunIcon : MoonIcon}
+            onPress={() => setMode(resolvedTheme === 'dark' ? 'light' : 'dark')}
+          />
+        );
 	const user = {
 		username: 'Admin Tester',
 		email: 'admin@admin.com',
@@ -93,7 +108,7 @@ export default function Account(){
 
 	return(
 		<Layout level="2" style={{flex: 1}}>
-		  <AppHeader title="Account" />
+		  <AppHeader title="Account" rightAction={ThemeToggle}  />
 			<Card style={styles.card}>
 
 				{/*

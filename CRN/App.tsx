@@ -3,7 +3,6 @@ import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 
-import { useColorScheme } from 'react-native';
 import { lightTheme, darkTheme } from './src/theme/customTheme.ts';
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -26,37 +25,46 @@ import SideMenu from './src/navigation/SideMenu.tsx';
 import Map from './src/screens/Map.tsx';
 import Home from './src/screens/Home.tsx';
 
+import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext.tsx';
+
 const Stack = createNativeStackNavigator();
 
-export default function App() {
-
-	const systemTheme = useColorScheme() ?? 'light';
-	const evaTheme = systemTheme === 'dark'? eva.dark : eva.light;
-	const customTheme = systemTheme === 'dark'? darkTheme : lightTheme;
+function AppInner() {
+  const { resolvedTheme } = useAppTheme();
+  const evaTheme    = resolvedTheme === 'dark' ? eva.dark : eva.light;
+  const customTheme = resolvedTheme === 'dark' ? darkTheme : lightTheme;
 
   return (
     <ApplicationProvider {...eva} theme={{ ...evaTheme, ...customTheme }}>
-     <SafeAreaProvider>
-      <IconRegistry icons ={EvaIconsPack} />
-      <SideMenuProvider>
-        <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false}}>
-                <Stack.Screen name="Login"            component={Login}                 />
-                <Stack.Screen name="Home"             component={Home}                  />
-                <Stack.Screen name="Directory"        component={DirectoryScreen}       />
-                <Stack.Screen name="SignUp"           component={SignUp}                />
-                <Stack.Screen name="DirectoryDetail"  component={DirectoryDetailScreen} />
-                <Stack.Screen name="Account"          component={Account}               />
-                <Stack.Screen name="Map"              component={Map}                   />
-                <Stack.Screen name="Classes"          component={MyClassesScreen}     />
-                <Stack.Screen name="ClassSearch"      component={ClassSearchScreen}     />
-                <Stack.Screen name="ClassSections"    component={ClassSectionsScreen}   />
-                <Stack.Screen name="ClassDetail"      component={ClassDetailScreen}     />
+      <SafeAreaProvider>
+        <IconRegistry icons={EvaIconsPack} />
+        <SideMenuProvider>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Login"           component={Login}                 />
+              <Stack.Screen name="Home"            component={Home}                  />
+              <Stack.Screen name="Directory"       component={DirectoryScreen}       />
+              <Stack.Screen name="SignUp"          component={SignUp}                />
+              <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
+              <Stack.Screen name="Account"         component={Account}               />
+              <Stack.Screen name="Map"             component={Map}                   />
+              <Stack.Screen name="Classes"         component={MyClassesScreen}       />
+              <Stack.Screen name="ClassSearch"     component={ClassSearchScreen}     />
+              <Stack.Screen name="ClassSections"   component={ClassSectionsScreen}   />
+              <Stack.Screen name="ClassDetail"     component={ClassDetailScreen}     />
             </Stack.Navigator>
-          <SideMenu />
-        </NavigationContainer>
+            <SideMenu />
+          </NavigationContainer>
         </SideMenuProvider>
-       </SafeAreaProvider>
+      </SafeAreaProvider>
     </ApplicationProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }
