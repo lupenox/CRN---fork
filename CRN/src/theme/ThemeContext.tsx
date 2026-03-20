@@ -3,11 +3,13 @@ import { useColorScheme } from 'react-native';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
-const ThemeContext = createContext<{
+type ThemeContextType = {
   mode: ThemeMode;
   resolvedTheme: 'light' | 'dark';
   setMode: (mode: ThemeMode) => void;
-}>({
+};
+
+export const ThemeContext = createContext<ThemeContextType>({
   mode: 'system',
   resolvedTheme: 'light',
   setMode: () => {},
