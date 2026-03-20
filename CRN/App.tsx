@@ -53,6 +53,8 @@ const RootNavigator = () => {
         // MAIN APP: User is logged in
         <>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
             <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
             <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
             <Stack.Screen name="Account" component={Account} />
