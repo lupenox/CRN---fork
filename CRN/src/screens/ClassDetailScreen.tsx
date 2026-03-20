@@ -1,13 +1,17 @@
-import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AppHeader } from '../navigation/AppHeader';
 import Card from '../components/Card';
+import Button from '../components/Button';
 
 const PersonIcon = (props) => <Icon {...props} name="person-outline" />;
 const HashIcon   = (props) => <Icon {...props} name="hash-outline" />;
 const PinIcon    = (props) => <Icon {...props} name="pin-outline" />;
+const NavIcon    = (props) => <Icon {...props} name="navigation-2-outline" />;
+
+const GOOGLE_MAPS_API_KEY = 'AIzaSyAm_mrIr3my6R_QJpdFOiiVGiO_G_86Svc';
 
 const SCHD_LABEL = {
   LEC: 'Lecture', LAB: 'Laboratory', SEM: 'Seminar',
@@ -22,6 +26,17 @@ function getBadgeColors(schedType: string, theme: Record<string, string>) {
     case 'IND': return { bg: theme['color-basic-200'],   text: theme['color-basic-600']   };
     default:    return { bg: theme['color-primary-100'], text: theme['color-primary-700'] };
   }
+}
+
+// Geocode a room/building string scoped to UWM's campus
+async function geocodeRoom(roomString: string): Promise<{ lat: number; lng: number } | null> {
+  const query = `${roomString}, University of Wisconsin-Milwaukee`;
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${GOOGLE_MAPS_API_KEY}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status !== 'OK' || !data.results?.length) return null;
+  const { lat, lng } = data.results[0].geometry.location;
+  return { lat, lng };
 }
 
 function InfoRow({ IconComp, label, value, hintColor }) {
@@ -66,6 +81,30 @@ export default function ClassDetailScreen() {
   const scheduleLabel = SCHD_LABEL[course.schedule_type] ?? course.schedule_type;
   const { bg, text }  = getBadgeColors(course.schedule_type, theme);
 
+const locationString = (course.room || course.campus)?.toLowerCase().includes('online')
+  ? null
+  : course.room || course.campus;
+
+  const [geocodedLocation, setGeocodedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [geocodeLoading, setGeocodeLoading] = useState(false);
+  const [geocodeFailed, setGeocodeFailed] = useState(false);
+
+  useEffect(() => {
+    if (!locationString) return;
+    setGeocodeLoading(true);
+    setGeocodeFailed(false);
+    geocodeRoom(locationString)
+      .then((coords) => {
+        if (coords) {
+          setGeocodedLocation(coords);
+        } else {
+          setGeocodeFailed(true);
+        }
+      })
+      .catch(() => setGeocodeFailed(true))
+      .finally(() => setGeocodeLoading(false));
+  }, [locationString]);
+
   return (
     <Layout level="2" style={styles.root}>
       <AppHeader title="Section Detail" showBack={true} />
@@ -91,7 +130,43 @@ export default function ClassDetailScreen() {
           <InfoRow IconComp={HashIcon}   label="CRN"        value={course.crn}        hintColor={hintColor} />
           <InfoRow IconComp={PersonIcon} label="Instructor" value={course.instructor}  hintColor={hintColor} />
           <InfoRow IconComp={PinIcon}    label="Room"       value={course.room}        hintColor={hintColor} />
-          <InfoRow IconComp={PinIcon}    label="Campus"     value={course.room ? undefined : course.campus} hintColor={hintColor} />
+          <InfoRow IconComp={PinIcon}    label="Location"     value={course.room ? undefined : course.campus} hintColor={hintColor} />
+
+          {/* Navigate button — shown when a location string exists */}
+          {locationString && (
+            <View style={styles.navigateRow}>
+              {geocodeLoading ? (
+                <View style={styles.geocodeStatus}>
+                  <ActivityIndicator size="small" color={theme['color-primary-500']} />
+                  <Text category="c1" appearance="hint" style={styles.geocodeStatusText}>
+                    Finding location…
+                  </Text>
+                </View>
+              ) : geocodeFailed ? (
+                <View style={styles.geocodeStatus}>
+                  <Icon name="alert-circle-outline" style={styles.geocodeStatusIcon} fill={theme['text-hint-color']} />
+                  <Text category="c1" appearance="hint" style={styles.geocodeStatusText}>
+                    Location not found
+                  </Text>
+                </View>
+              ) : geocodedLocation ? (
+                <Button
+                  style={styles.navigateButton}
+                  accessoryLeft={NavIcon}
+                  onPress={() => navigation.navigate('Map', {
+                    targetLocation: {
+                      id: `class-${course.crn}`,
+                      lat: geocodedLocation.lat,
+                      lng: geocodedLocation.lng,
+                      title: locationString,
+                    }
+                  })}
+                >
+                  Navigate to {locationString}
+                </Button>
+              ) : null}
+            </View>
+          )}
         </Card>
 
         {/* Meeting times card */}
@@ -107,15 +182,20 @@ export default function ClassDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  root:         { flex: 1 },
-  scroll:       { padding: 16, gap: 12, paddingBottom: 40 },
-  card:         { width: '100%' },
-  titleTopRow:  { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  badge:        { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  courseCode:   { marginTop: 4, marginBottom: 2 },
-  sectionLabel: { marginBottom: 8 },
-  divider:      { marginBottom: 12 },
-  infoRow:      { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 },
-  infoIcon:     { width: 18, height: 18, marginTop: 2 },
-  addBtn:       { marginTop: 8 },
+  root:              { flex: 1 },
+  scroll:            { padding: 16, gap: 12, paddingBottom: 40 },
+  card:              { width: '100%' },
+  titleTopRow:       { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  badge:             { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+  courseCode:        { marginTop: 4, marginBottom: 2 },
+  sectionLabel:      { marginBottom: 8 },
+  divider:           { marginBottom: 12 },
+  infoRow:           { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 },
+  infoIcon:          { width: 18, height: 18, marginTop: 2 },
+  addBtn:            { marginTop: 8 },
+  navigateRow:       { marginTop: 4 },
+  navigateButton:    { width: '100%' },
+  geocodeStatus:     { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 },
+  geocodeStatusIcon: { width: 16, height: 16 },
+  geocodeStatusText: { fontSize: 12 },
 });
