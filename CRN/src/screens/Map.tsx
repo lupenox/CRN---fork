@@ -219,7 +219,6 @@ const staticStyles = StyleSheet.create({
   },
   calloutTitle: { fontSize: 14, fontWeight: '700', marginBottom: 2 },
   calloutSubtitle: { fontSize: 12, marginBottom: 2 },
-  calloutDate: { fontSize: 11, fontWeight: '600', marginBottom: 10 },
   calloutButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -332,12 +331,12 @@ export default function Map({ route }: any) {
   const [selectedEvent, setSelectedEvent] = useState<EventWithCoords | null>(null);
 
   // View mode
-  const [mapViewMode, setMapViewMode] = useState<MapView_t>('resources');
-  const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+const { targetLocation: initialTarget, mapViewMode: initialViewMode } = route.params ?? {};
 
-  const [geocodedEvents, setGeocodedEvents] = useState<EventWithCoords[]>([]);
-  const { targetLocation: initialTarget } = route.params ?? {};
-  const [activeTarget, setActiveTarget] = useState(initialTarget ?? null);
+const [mapViewMode, setMapViewMode] = useState<MapView_t>(initialViewMode ?? 'resources');
+const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+
+const [geocodedEvents, setGeocodedEvents] = useState<EventWithCoords[]>([]);  const [activeTarget, setActiveTarget] = useState(initialTarget ?? null);
 
   const sheetHeight = useRef(new Animated.Value(SHEET_COLLAPSED)).current;
 
@@ -388,16 +387,15 @@ export default function Map({ route }: any) {
     (e) => e.lat !== undefined && e.lng !== undefined
   );
 
-  useEffect(() => {
-    if (mapViewMode !== 'events') return;
-    if (geocodedEvents.length > 0) return;
+useEffect(() => {
+  if (geocodedEvents.length > 0) return;
 
-    const withIds = (eventsData as any[]).map((e, i) => ({
-      ...e,
-      id: `event-${i}`,
-    }));
-    setGeocodedEvents(withIds);
-  }, [mapViewMode]);
+  const withIds = (eventsData as any[]).map((e, i) => ({
+    ...e,
+    id: `event-${i}`,
+  }));
+  setGeocodedEvents(withIds);
+}, []);
 
   useEffect(() => {
     async function startTracking() {
@@ -658,9 +656,12 @@ export default function Map({ route }: any) {
             <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
               {selectedEvent.title}
             </Text>
-            <Text style={[staticStyles.calloutDate, { color: tc.calloutDateColor }]}>
-              📅 {selectedEvent.date}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 }}>
+              <Icon name="calendar-outline" style={staticStyles.calloutIcon} fill={tc.calloutDateColor} />
+              <Text style={[staticStyles.calloutDate, { color: tc.calloutDateColor }]}>
+                {selectedEvent.date}
+              </Text>
+            </View>
             <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={2}>
               {selectedEvent.location}
             </Text>

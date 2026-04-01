@@ -20,6 +20,9 @@ import ClassSearchScreen   from './src/screens/ClassSearchScreen';
 import ClassSectionsScreen from './src/screens/ClassSectionsScreen';
 import ClassDetailScreen   from './src/screens/ClassDetailScreen';
 
+import EventsScreen      from './src/screens/EventsScreen';
+import EventDetailScreen from './src/screens/EventDetailScreen';
+
 import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
 import SideMenu from './src/navigation/SideMenu.tsx';
 import Map from './src/screens/Map.tsx';
@@ -55,6 +58,8 @@ export default function App() {
                       <Stack.Screen name="ClassSearch"     component={ClassSearchScreen}     />
                       <Stack.Screen name="ClassSections"   component={ClassSectionsScreen}   />
                       <Stack.Screen name="ClassDetail"     component={ClassDetailScreen}     />
+                      <Stack.Screen name="Events"          component={EventsScreen}          />
+                      <Stack.Screen name="EventDetail"     component={EventDetailScreen}     />
                     </Stack.Navigator>
                     <SideMenu />
                   </NavigationContainer>
