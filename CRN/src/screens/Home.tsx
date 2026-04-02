@@ -88,12 +88,12 @@ export default function Home({ navigation }: any) {
         {/* Quick nav tiles row */}
         <View style={styles.quickRow}>
           <QuickTile
-            icon="map-outline"
-            label="Map"
-            color={tc.info}
+            icon="award-outline"
+            label="Classes"
+            color={tc.warning}
             bg={tc.surface}
             border={tc.border}
-            onPress={() => navigation.navigate('Map')}
+            onPress={() => navigation.navigate('Classes')}
           />
           <QuickTile
             icon="calendar-outline"
@@ -112,12 +112,12 @@ export default function Home({ navigation }: any) {
             onPress={() => navigation.navigate('Directory')}
           />
           <QuickTile
-            icon="award-outline"
-            label="Classes"
-            color={tc.warning}
+            icon="map-outline"
+            label="Map"
+            color={tc.info}
             bg={tc.surface}
             border={tc.border}
-            onPress={() => navigation.navigate('Classes')}
+            onPress={() => navigation.navigate('Map')}
           />
         </View>
 
