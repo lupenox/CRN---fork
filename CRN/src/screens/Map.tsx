@@ -397,26 +397,46 @@ useEffect(() => {
   setGeocodedEvents(withIds);
 }, []);
 
-  useEffect(() => {
-    async function startTracking() {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-      subscriptionRef.current = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 5000, distanceInterval: 0 },
-        (loc) => setLocation(loc)
-      );
-    }
-    startTracking();
+ useEffect(() => {
+   let isMounted = true;
 
-    if (activeTarget && mapRef.current) {
-      mapRef.current.animateCamera({
-        center: { latitude: activeTarget.lat, longitude: activeTarget.lng },
-        zoom: 17,
-      });
-    }
+   async function startTracking() {
+     const { status } = await Location.requestForegroundPermissionsAsync();
+     if (status !== 'granted') return;
 
-    return () => { subscriptionRef.current?.remove(); };
-  }, []);
+     const sub = await Location.watchPositionAsync(
+       {
+         accuracy: Location.Accuracy.Balanced,
+         timeInterval: 5000,
+         distanceInterval: 10,
+       },
+       (loc) => {
+         if (!isMounted) return;
+         setLocation(loc);
+       },
+       (error) => {
+         console.error("Location error:", error);
+       }
+     );
+
+     subscriptionRef.current = sub;
+   }
+
+   startTracking();
+
+   if (activeTarget && mapRef.current) {
+     mapRef.current.animateCamera({
+       center: { latitude: activeTarget.lat, longitude: activeTarget.lng },
+       zoom: 17,
+     });
+   }
+
+   return () => {
+     isMounted = false;
+     subscriptionRef.current?.remove();
+     subscriptionRef.current = null;
+   };
+ }, []);
 
   useEffect(() => {
     if (activeTarget?.id && markerRefs.current[activeTarget.id]) {
