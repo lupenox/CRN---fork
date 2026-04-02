@@ -5,20 +5,22 @@ import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SideMenuContext } from './SideMenuContext';
 
-const MenuIcon = (props) => <Icon {...props} name="menu-outline" />;
-const PersonIcon = (props) => <Icon {...props} name="person-outline" />;
-const BackIcon = (props) => <Icon {...props} name="arrow-back-outline" />;
+const MenuIcon = (props: any) => <Icon {...props} name="menu-outline" />;
+const PersonIcon = (props: any) => <Icon {...props} name="person-outline" />;
+const BackIcon = (props: any) => <Icon {...props} name="arrow-back-outline" />;
 
 type AppHeaderProps = {
     title?: string;
     showBack?: boolean;
     onBack?: () => void;
     showAccount?: boolean;
+    rightAction?: React.ReactElement; // <-- 1. Good! It's on the guest list.
 };
 
-export const AppHeader = ({ title = '', showBack = false, onBack, showAccount = true }: AppHeaderProps) => {
+// 2. We must destructure 'rightAction' here so the component can actually use it!
+export const AppHeader = ({ title = '', showBack = false, onBack, showAccount = true, rightAction }: AppHeaderProps) => {
     const insets = useSafeAreaInsets();
-    const navigation = useNavigation();
+    const navigation = useNavigation() as any;
     const { openMenu, closeMenu } = useContext(SideMenuContext);
 
     const handleBack = () => {
@@ -34,9 +36,17 @@ export const AppHeader = ({ title = '', showBack = false, onBack, showAccount = 
         ? <TopNavigationAction icon={BackIcon} onPress={handleBack} />
         : <TopNavigationAction icon={MenuIcon} onPress={openMenu} />;
 
-    const RightAction = () => showAccount
-        ? <TopNavigationAction icon={PersonIcon} onPress={() => navigation.navigate('Account')} />
-        : null;
+    // 3. Update the logic: If a custom rightAction (like your ThemeToggle) is passed in, use it!
+    // Otherwise, fall back to the default PersonIcon.
+    const renderRightAccessory = () => {
+        if (rightAction) {
+            return rightAction;
+        }
+        if (showAccount) {
+            return <TopNavigationAction icon={PersonIcon} onPress={() => navigation.navigate('Account')} />;
+        }
+        return <></>;
+    };
 
     return (
         <View style={{ paddingTop: insets.top }}>
@@ -44,7 +54,7 @@ export const AppHeader = ({ title = '', showBack = false, onBack, showAccount = 
                 title={title}
                 alignment="center"
                 accessoryLeft={<LeftAction />}
-                accessoryRight={<RightAction />}
+                accessoryRight={renderRightAccessory} // <-- 4. Pass the new logic here!
             />
         </View>
     );

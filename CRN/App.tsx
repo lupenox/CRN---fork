@@ -97,10 +97,6 @@ const ThemedApp = () => {
 
 // 2. Wrap the entire app in the Providers
 export default function App() {
-  // const systemTheme = useColorScheme() ?? 'light';
-  // const evaTheme = systemTheme === 'dark' ? eva.dark : eva.light;
-  // const customTheme = systemTheme === 'dark' ? darkTheme : lightTheme;
-
   return (
     <Auth0Provider 
       domain="dev-85gf7oggpaitwy0i.us.auth0.com" 
@@ -112,55 +108,3 @@ export default function App() {
     </Auth0Provider>
   );
 }
-// import * as React from 'react';
-// import { ApplicationProvider, Button, Layout, Text, IconRegistry } from '@ui-kitten/components';
-// import * as eva from '@eva-design/eva';
-// import { EvaIconsPack } from '@ui-kitten/eva-icons';
-
-// import { useColorScheme } from 'react-native';
-// import { lightTheme, darkTheme } from './src/theme/customTheme.ts';
-
-// import { NavigationContainer } from '@react-navigation/native';
-// import { createNativeStackNavigator } from '@react-navigation/native-stack';
-// import { SafeAreaProvider } from 'react-native-safe-area-context';
-
-// import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
-// import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen.tsx';
-// import Account from './src/screens/Account.tsx';
-// import Login from './src/screens/Login.tsx';
-// import SignUp from './src/screens/SignUp.tsx';
-
-// import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
-// import SideMenu from './src/navigation/SideMenu.tsx';
-// import MenuButton from './src/navigation/MenuButton';
-// import Map from './src/screens/Map.tsx';
-
-// const Stack = createNativeStackNavigator();
-
-// export default function App() {
-
-// 	const systemTheme = useColorScheme() ?? 'light';
-// 	const evaTheme = systemTheme === 'dark'? eva.dark : eva.light;
-// 	const customTheme = systemTheme === 'dark'? darkTheme : lightTheme;
-
-//   return (
-//     <ApplicationProvider {...eva} theme={{ ...evaTheme, ...customTheme }}>
-//      <SafeAreaProvider>
-//       <IconRegistry icons ={EvaIconsPack} />
-//       <SideMenuProvider>
-//         <NavigationContainer>
-//             <Stack.Navigator screenOptions={{ headerShown: false}}>
-//                 <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-//                 <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
-//                 <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
-//                 <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
-//                 <Stack.Screen name="Account" component={Account} />
-//                 <Stack.Screen name="Map" component={Map} />
-//             </Stack.Navigator>
-//           <SideMenu />
-//         </NavigationContainer>
-//         </SideMenuProvider>
-//        </SafeAreaProvider>
-//     </ApplicationProvider>
-//   );
-// }
