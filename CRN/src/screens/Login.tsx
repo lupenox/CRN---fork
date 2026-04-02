@@ -11,6 +11,9 @@ export default function Login() {
       await authorize({
         scope: 'openid profile email',
         audience: 'https://api.crn.uwm.edu',
+        additionalParameters: {
+          prompt: 'select_account',
+        },
       });
     } catch (e) {
       console.error('Login error:', e);

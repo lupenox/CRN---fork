@@ -6,6 +6,7 @@ import { ApplicationProvider, IconRegistry, Layout } from '@ui-kitten/components
 import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import { lightTheme, darkTheme } from './src/theme/customTheme.ts';
+import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext.tsx';
 
 // Navigation & Safe Area
 import { NavigationContainer } from '@react-navigation/native';
@@ -20,7 +21,7 @@ import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
 import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen.tsx';
 import Account from './src/screens/Account.tsx';
 import Login from './src/screens/Login.tsx';
-import SignUp from './src/screens/SignUp.tsx';
+//import SignUp from './src/screens/SignUp.tsx';
 
 import MyClassesScreen from './src/screens/MyClassesScreen.tsx';
 import ClassSearchScreen  from './src/screens/ClassSearchScreen.tsx';
@@ -54,7 +55,7 @@ const RootNavigator = () => {
         <>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
+            {/* <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} /> */}
             <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
             <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
             <Stack.Screen name="Account" component={Account} />
@@ -76,25 +77,38 @@ const RootNavigator = () => {
   );
 };
 
+// 2. Create a wrapper component that listens to our ThemeContext
+const ThemedApp = () => {
+  const { resolvedTheme } = useAppTheme(); // <-- Now it listens to your toggle!
+  const evaTheme = resolvedTheme === 'dark' ? eva.dark : eva.light;
+  const customTheme = resolvedTheme === 'dark' ? darkTheme : lightTheme;
+
+  return (
+    <ApplicationProvider {...eva} theme={{ ...evaTheme, ...customTheme }}>
+      <SafeAreaProvider>
+        <IconRegistry icons={EvaIconsPack} />
+        <SideMenuProvider>
+          <RootNavigator />
+        </SideMenuProvider>
+      </SafeAreaProvider>
+    </ApplicationProvider>
+  );
+};
+
 // 2. Wrap the entire app in the Providers
 export default function App() {
-  const systemTheme = useColorScheme() ?? 'light';
-  const evaTheme = systemTheme === 'dark' ? eva.dark : eva.light;
-  const customTheme = systemTheme === 'dark' ? darkTheme : lightTheme;
+  // const systemTheme = useColorScheme() ?? 'light';
+  // const evaTheme = systemTheme === 'dark' ? eva.dark : eva.light;
+  // const customTheme = systemTheme === 'dark' ? darkTheme : lightTheme;
 
   return (
     <Auth0Provider 
       domain="dev-85gf7oggpaitwy0i.us.auth0.com" 
       clientId="VpyvzewB5JqS7K8WVfbBHPyh1xoPX70i"
     >
-      <ApplicationProvider {...eva} theme={{ ...evaTheme, ...customTheme }}>
-        <SafeAreaProvider>
-          <IconRegistry icons={EvaIconsPack} />
-          <SideMenuProvider>
-            <RootNavigator />
-          </SideMenuProvider>
-        </SafeAreaProvider>
-      </ApplicationProvider>
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
     </Auth0Provider>
   );
 }
