@@ -1,10 +1,9 @@
-
-// db.ts
 import postgres from "postgres";
 
+const ssl = Deno.env.get("DEV") === 'true' ? undefined : 'require';
 export const sql = postgres(
   Deno.env.get("DATABASE_URL")!,
   {
-    ssl: "require",
+    ssl: ssl,
   }
 );

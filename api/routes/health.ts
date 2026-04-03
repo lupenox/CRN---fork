@@ -1,4 +1,5 @@
+import CrnResponse from "../util/httpResponse.ts";
 
-export const health = () =>{
-  Response.json({ status: "ok" });
+export function GET(_req : Request) {
+  return CrnResponse();
 }

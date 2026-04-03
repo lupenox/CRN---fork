@@ -1,0 +1,13 @@
+[
+    {
+        "name": "events",
+        "allowedColumns": [
+            "id",
+            "title",
+            "date",
+            "location",
+            "description",
+            "organizer"
+        ]
+    }
+]
