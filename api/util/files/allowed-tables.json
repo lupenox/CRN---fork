@@ -1,13 +1,68 @@
 [
     {
-        "name": "events",
+        "name": "course",
+        "allowedColumns": [
+            "id",
+            "course_code",
+            "title",
+            "crn",
+            "section",
+            "schedule",
+            "meets",
+            "instructor",
+            "campus",
+            "room"
+        ]
+    },
+    {
+        "name": "event",
         "allowedColumns": [
             "id",
             "title",
-            "date",
-            "location",
             "description",
-            "organizer"
+            "location",
+            "organizer",
+            "date",
+            "latitude",
+            "longitude"
+        ]
+    },
+    {
+        "name": "resource",
+        "allowedColumns": [
+            "id",
+            "title",
+            "category",
+            "description",
+            "location",
+            "address",
+            "organizer",
+            "phone",
+            "website",
+            "hours",
+            "lat",
+            "lng"
+        ]
+    },
+    {
+        "name": "review",
+        "allowedColumns": [
+            "id",
+            "user_id",
+            "event_id",
+            "resource_id",
+            "rating",
+            "comment",
+            "create_at"
+        ]
+    },
+    {
+        "name": "users",
+        "allowedColumns": [
+            "id",
+            "name",
+            "email",
+            "type"
         ]
     }
 ]
