@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { useColorScheme, ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 // UI Kitten & Eva Design
 import { ApplicationProvider, IconRegistry, Layout } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import { lightTheme, darkTheme } from './src/theme/customTheme.ts';
-import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext.tsx';
+import { ThemeProvider, ThemeContext } from './src/theme/ThemeContext.tsx';
 
 // Navigation & Safe Area
 import { NavigationContainer } from '@react-navigation/native';
@@ -16,26 +16,32 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 // Auth0
 import { Auth0Provider, useAuth0 } from 'react-native-auth0';
 
-// Screens & Context
+// Context Providers
+import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
+import { RecentlyViewedProvider } from './src/context/RecentlyViewedContext';
+
+// Screens
 import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
 import DirectoryDetailScreen from './src/screens/DirectoryDetailScreen.tsx';
 import Account from './src/screens/Account.tsx';
 import Login from './src/screens/Login.tsx';
-//import SignUp from './src/screens/SignUp.tsx';
+// SignUp intentionally omitted (Handled by Auth0 Universal Login)
 
-import MyClassesScreen from './src/screens/MyClassesScreen.tsx';
-import ClassSearchScreen  from './src/screens/ClassSearchScreen.tsx';
-import ClassSectionsScreen from './src/screens/ClassSectionsScreen.tsx';
-import ClassDetailScreen  from './src/screens/ClassDetailScreen.tsx';
+import MyClassesScreen     from './src/screens/MyClassesScreen';
+import ClassSearchScreen   from './src/screens/ClassSearchScreen';
+import ClassSectionsScreen from './src/screens/ClassSectionsScreen';
+import ClassDetailScreen   from './src/screens/ClassDetailScreen';
 
-import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
+import EventsScreen        from './src/screens/EventsScreen';
+import EventDetailScreen   from './src/screens/EventDetailScreen';
+
 import SideMenu from './src/navigation/SideMenu.tsx';
 import Map from './src/screens/Map.tsx';
 import Home from './src/screens/Home.tsx';
 
 const Stack = createNativeStackNavigator();
 
-// 1. Create a Root Navigator to handle the conditional logic
+// 1. Create a Root Navigator to handle the Auth0 conditional logic
 const RootNavigator = () => {
   const { user, isLoading } = useAuth0();
 
@@ -54,16 +60,17 @@ const RootNavigator = () => {
         // MAIN APP: User is logged in
         <>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home" component={Home} />
-            {/* <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} /> */}
-            <Stack.Screen name="Directory" component={DirectoryScreen} options={{ title: 'Directory of UWM Resources' }} />
+            <Stack.Screen name="Home"            component={Home}                  />
+            <Stack.Screen name="Directory"       component={DirectoryScreen}       />
             <Stack.Screen name="DirectoryDetail" component={DirectoryDetailScreen} />
-            <Stack.Screen name="Account" component={Account} />
-            <Stack.Screen name="Map" component={Map} />
-            <Stack.Screen name="Classes"          component={MyClassesScreen}     />
-            <Stack.Screen name="ClassSearch"      component={ClassSearchScreen}     />
-            <Stack.Screen name="ClassSections"    component={ClassSectionsScreen}   />
-            <Stack.Screen name="ClassDetail"      component={ClassDetailScreen}     />
+            <Stack.Screen name="Account"         component={Account}               />
+            <Stack.Screen name="Map"             component={Map}                   />
+            <Stack.Screen name="Classes"         component={MyClassesScreen}       />
+            <Stack.Screen name="ClassSearch"     component={ClassSearchScreen}     />
+            <Stack.Screen name="ClassSections"   component={ClassSectionsScreen}   />
+            <Stack.Screen name="ClassDetail"     component={ClassDetailScreen}     />
+            <Stack.Screen name="Events"          component={EventsScreen}          />
+            <Stack.Screen name="EventDetail"     component={EventDetailScreen}     />
           </Stack.Navigator>
           <SideMenu />
         </>
@@ -77,25 +84,7 @@ const RootNavigator = () => {
   );
 };
 
-// 2. Create a wrapper component that listens to our ThemeContext
-const ThemedApp = () => {
-  const { resolvedTheme } = useAppTheme(); // <-- Now it listens to your toggle!
-  const evaTheme = resolvedTheme === 'dark' ? eva.dark : eva.light;
-  const customTheme = resolvedTheme === 'dark' ? darkTheme : lightTheme;
-
-  return (
-    <ApplicationProvider {...eva} theme={{ ...evaTheme, ...customTheme }}>
-      <SafeAreaProvider>
-        <IconRegistry icons={EvaIconsPack} />
-        <SideMenuProvider>
-          <RootNavigator />
-        </SideMenuProvider>
-      </SafeAreaProvider>
-    </ApplicationProvider>
-  );
-};
-
-// 2. Wrap the entire app in the Providers
+// 2. Wrap the app using the team's GitHub structure + Auth0
 export default function App() {
   return (
     <Auth0Provider 
@@ -103,7 +92,29 @@ export default function App() {
       clientId="VpyvzewB5JqS7K8WVfbBHPyh1xoPX70i"
     >
       <ThemeProvider>
-        <ThemedApp />
+        {/* Using the GitHub branch's ThemeContext.Consumer pattern */}
+        <ThemeContext.Consumer>
+          {({ resolvedTheme }) => {
+            const evaTheme    = resolvedTheme === 'dark' ? eva.dark : eva.light;
+            const customTheme = resolvedTheme === 'dark' ? darkTheme : lightTheme;
+
+            return (
+              <ApplicationProvider {...eva} theme={{ ...evaTheme, ...customTheme }}>
+                <SafeAreaProvider>
+                  <IconRegistry icons={EvaIconsPack} />
+                  
+                  {/* New RecentlyViewedProvider added here */}
+                  <RecentlyViewedProvider>
+                    <SideMenuProvider>
+                      <RootNavigator />
+                    </SideMenuProvider>
+                  </RecentlyViewedProvider>
+
+                </SafeAreaProvider>
+              </ApplicationProvider>
+            );
+          }}
+        </ThemeContext.Consumer>
       </ThemeProvider>
     </Auth0Provider>
   );
