@@ -9,7 +9,7 @@ export type CrnEvent = {
     Organizer : string | null
 }
 
-export const EVENTS_TABLE_NAME = 'events';
+export const EVENTS_TABLE_NAME = 'event';
 
 await sql`
     CREATE TABLE IF NOT EXISTS ${sql(EVENTS_TABLE_NAME)} (
