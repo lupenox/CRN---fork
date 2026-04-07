@@ -15,7 +15,7 @@
         ]
     },
     {
-        "name": "event",
+        "name": "events",
         "allowedColumns": [
             "id",
             "title",

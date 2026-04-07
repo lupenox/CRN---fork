@@ -1,5 +1,6 @@
 import allowedJson from "./files/allowed-tables.json" with { type: 'json' };
 import { sql } from "../db.ts";
+import { logAppStat } from "./appStats.ts";
 
 type Table = {
     name : string,
@@ -38,6 +39,7 @@ export async function getDynamicData(
                 SELECT ${columns} FROM ${sql(table)};
             `;
         } else {
+            await logAppStat(table, id);
             result = await sql`
                 SELECT ${columns} FROM ${sql(table)} WHERE id = ${id};
             `;
