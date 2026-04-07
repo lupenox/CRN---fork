@@ -1,5 +1,6 @@
 import allowedJson from "./files/allowed-tables.json" with { type: 'json' };
 import { sql } from "../db.ts";
+import { logAppStat } from "./appStats.ts";
 
 type Table = {
     name : string,
@@ -29,7 +30,11 @@ export async function getDynamicData(
         throw new Error('Table is not in the allowlist');
     }
 
-    const columns = sql(allowedTables.get(table) as string[]);
+    const rawColumns = (
+            allowedTables.get(table) as string[]
+        ).map(s => s.toLowerCase());
+
+    const columns = sql(rawColumns);
 
     let result;
     try {
@@ -38,6 +43,7 @@ export async function getDynamicData(
                 SELECT ${columns} FROM ${sql(table)};
             `;
         } else {
+            await logAppStat(table, id);
             result = await sql`
                 SELECT ${columns} FROM ${sql(table)} WHERE id = ${id};
             `;
@@ -63,7 +69,7 @@ export async function postDynamicData(
     const records : Record<string, string> = {};
     for(const col of allowedColumns) {
         if(col != 'id' && obj.has(col)) {
-            records[col] = obj.get(col) as string;
+            records[col.toLowerCase()] = obj.get(col) as string;
         }
     }
 
