@@ -28,7 +28,7 @@ import SideMenu from './src/navigation/SideMenu.tsx';
 import Map from './src/screens/Map.tsx';
 import Home from './src/screens/Home.tsx';
 
-import { RecentlyViewedProvider } from './src/context/RecentlyViewedContext';
+import { RecentlySearchedProvider } from './src/context/RecentlySearchedContext.tsx';
 
 import { ThemeProvider, ThemeContext } from './src/theme/ThemeContext.tsx';
 
@@ -46,7 +46,7 @@ export default function App() {
             <ApplicationProvider {...eva} theme={{ ...evaTheme, ...customTheme }}>
               <SafeAreaProvider>
                 <IconRegistry icons={EvaIconsPack} />
-                <RecentlyViewedProvider>
+                <RecentlySearchedProvider>
                 <SideMenuProvider>
                   <NavigationContainer>
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -67,7 +67,7 @@ export default function App() {
                     <SideMenu />
                   </NavigationContainer>
                 </SideMenuProvider>
-                </RecentlyViewedProvider>
+                </RecentlySearchedProvider>
               </SafeAreaProvider>
             </ApplicationProvider>
           );

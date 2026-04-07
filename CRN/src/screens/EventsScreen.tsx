@@ -9,7 +9,7 @@ import {
 import { Layout, Text, Icon, useTheme } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
 import eventsData from '../../scripts/events_geocoded.json';
-
+import { useRecentlySearched } from '../context/RecentlySearchedContext';
 // Types
 type DateFilter = 'all' | 'today' | '3days' | 'week';
 
@@ -75,12 +75,12 @@ function isValidEventDate(dateStr: string): boolean {
 }
 
 // Main Screen
-export default function EventsScreen({ navigation }: any) {
+export default function EventsScreen({ navigation, route }: any) {
   const theme = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(route?.params?.initialQuery ?? '');
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
   const [sortAsc, setSortAsc] = useState(true);
-
+  const { addRecentSearch } = useRecentlySearched();
   const tc = {
     bg:           theme['color-basic-800'],
     surface:      theme['color-basic-700'],
@@ -164,6 +164,9 @@ export default function EventsScreen({ navigation }: any) {
           placeholderTextColor={tc.hint}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onBlur={() => {
+            if (searchQuery.trim()) addRecentSearch(searchQuery.trim(), 'Events');
+          }}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')}>
