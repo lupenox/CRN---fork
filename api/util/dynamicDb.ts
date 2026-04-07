@@ -30,7 +30,11 @@ export async function getDynamicData(
         throw new Error('Table is not in the allowlist');
     }
 
-    const columns = sql(allowedTables.get(table) as string[]);
+    const rawColumns = (
+            allowedTables.get(table) as string[]
+        ).map(s => s.toLowerCase());
+
+    const columns = sql(rawColumns);
 
     let result;
     try {
@@ -65,7 +69,7 @@ export async function postDynamicData(
     const records : Record<string, string> = {};
     for(const col of allowedColumns) {
         if(col != 'id' && obj.has(col)) {
-            records[col] = obj.get(col) as string;
+            records[col.toLowerCase()] = obj.get(col) as string;
         }
     }
 
