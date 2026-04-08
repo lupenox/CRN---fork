@@ -4,8 +4,7 @@ import { Layout, Text, Icon, useTheme } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
 import { mockResources } from '../data/mockData';
 import eventsData from '../../scripts/events_geocoded.json';
-import { useRecentlyViewed } from '../context/RecentlyViewedContext';
-
+import { useRecentlySearched } from '../context/RecentlySearchedContext';
 type Event = {
   id: string;
   title: string;
@@ -51,8 +50,7 @@ export default function Home({ navigation }: any) {
   const theme = useTheme();
   const todayEvents = useMemo(() => getTodaysEvents(), []);
   const displayedEvents = todayEvents.slice(0, 3);
-  const { recentResources } = useRecentlyViewed();
-
+  const { recentSearches, clearRecentSearches  } = useRecentlySearched();
   const now = new Date();
   const hour = now.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -71,6 +69,23 @@ export default function Home({ navigation }: any) {
     success:     theme['color-success-500'],
     warning:     theme['color-warning-500'],
     danger:      theme['color-danger-500'],
+  };
+
+  const SECTION_ICONS: Record<string, string> = {
+    Events:    'calendar-outline',
+    Classes:   'award-outline',
+    Directory: 'book-outline',
+  };
+  const SECTION_COLORS: Record<string, string> = {
+    Events:    tc.primary,
+    Classes:   tc.warning,
+    Directory: tc.success,
+  };
+
+  const SECTION_NAV: Record<string, string> = {
+    Events:    'Events',
+    Classes:   'ClassSearch',
+    Directory: 'Directory',
   };
 
   return (
@@ -182,39 +197,41 @@ export default function Home({ navigation }: any) {
 
         {/* Recently Viewed tile */}
         <SectionTile
-          icon="clock-outline"
+          icon="search-outline"
           iconColor={tc.info}
-          title="Recently Viewed"
-          subtitle="Resources you've visited"
-          actionLabel="Directory"
-          onAction={() => navigation.navigate('Directory')}
+          title="Recent Searches"
+          subtitle={recentSearches.length > 0 ? 'Jump back in' : 'No searches yet'}
+          actionLabel="Clear"
+          onAction={clearRecentSearches}
           tc={tc}
         >
-          {recentResources.length === 0 ? (
+          {recentSearches.length === 0 ? (
             <View style={[styles.emptySlot, { borderColor: tc.border }]}>
-              <Icon name="clock-outline" style={styles.emptySlotIcon} fill={tc.hint} />
+              <Icon name="search-outline" style={styles.emptySlotIcon} fill={tc.hint} />
               <Text style={[styles.emptySlotText, { color: tc.hint }]}>
-                Visit a resource to see it here
+                Search events or classes to see them here
               </Text>
             </View>
           ) : (
-            recentResources.map((resource) => (
+            recentSearches.slice(0, 4).map((entry) => (
               <TouchableOpacity
-                key={resource.id}
+                key={entry.id}
                 style={[styles.listRow, { borderColor: tc.border }]}
-                onPress={() => navigation.navigate('DirectoryDetail', { event: resource })}
+                onPress={() => navigation.navigate(SECTION_NAV[entry.section], { initialQuery: entry.query })}
                 activeOpacity={0.7}
               >
-                <View style={[styles.listAccent, { backgroundColor: tc.info }]} />
+                <View style={[styles.listAccent, { backgroundColor: SECTION_COLORS[entry.section] }]} />
                 <View style={styles.listBody}>
                   <Text style={[styles.listTitle, { color: tc.text }]} numberOfLines={1}>
-                    {resource.title}
+                    {entry.query}
                   </Text>
                   <View style={styles.listMeta}>
-                    <Icon name="pin-outline" style={styles.listMetaIcon} fill={tc.hint} />
-                    <Text style={[styles.listMetaText, { color: tc.hint }]} numberOfLines={1}>
-                      {resource.location}
-                    </Text>
+                    <Icon
+                      name={SECTION_ICONS[entry.section]}
+                      style={styles.listMetaIcon}
+                      fill={tc.hint}
+                    />
+                    <Text style={[styles.listMetaText, { color: tc.hint }]}>{entry.section}</Text>
                   </View>
                 </View>
                 <Icon name="chevron-right-outline" style={styles.listChevron} fill={tc.border} />
