@@ -460,7 +460,7 @@ export default function Map({ route }: any) {
     distanceColor:              theme['color-primary-600'],
     etaColor:                   theme['color-primary-600'],
     etaSubColor:                theme['text-hint-color'],
-    stepInstructionColor:       theme['color-basic-400'],
+    stepInstructionColor:       theme['color-basic-1100'],
     stepInstructionActiveColor: theme['color-primary-600'],
     stepDistanceColor:          theme['text-hint-color'],
     stopTextColor:              theme['color-danger-500'],
@@ -505,11 +505,12 @@ export default function Map({ route }: any) {
 
     async function startTracking() {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
+      if (status !== 'granted') {
+        return;
+      }
       const sub = await Location.watchPositionAsync(
         { accuracy: Location.Accuracy.Balanced, timeInterval: 5000, distanceInterval: 10 },
         (loc) => { if (!isMounted) return; setLocation(loc); },
-        (error) => { console.error('Location error:', error); }
       );
       subscriptionRef.current = sub;
     }
@@ -609,6 +610,8 @@ export default function Map({ route }: any) {
           ref={mapRef}
           style={staticStyles.map}
           customMapStyle={isDarkMode ? darkMapStyle : []}
+          showsUserLocation={true}
+          showsMyLocationButton={false}
           onPress={() => {
             if (markerJustPressedRef.current) {
               markerJustPressedRef.current = false;

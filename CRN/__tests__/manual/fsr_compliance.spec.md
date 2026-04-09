@@ -1,12 +1,12 @@
 [SCRUM-63] Keyword Depth Search (Directory)
 
-PASS [N]
+PASS [Y]
 Steps:
 1. Navigate to the Directory screen.
 2. Enter a keyword that exists only in the resource description (e.g., "instruction").
 3. Observe the results list (tutoring should be displayed).
 
-![Test Failure](../images/FSR_Test_1.png)
+![Test Success](../images/FSR_Test_1.png)
 
 External Link Tab Persistence
 PASS [Y]
