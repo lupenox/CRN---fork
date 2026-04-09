@@ -21,7 +21,10 @@ export default function DirectoryScreen({ navigation, route }: any) {
 
   // Combined filtering and search logic
   const filteredData = mockResources.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = item.title.toLowerCase().includes(query) ||
+      item.description.toLowerCase().includes(query) ||
+      item.location.toLowerCase().includes(query);
     const matchesCategory = selectedCategory === 'All Categories' || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
