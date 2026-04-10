@@ -421,7 +421,8 @@ export default function Map({ route }: any) {
   const [pendingTarget, setPendingTarget] = useState<any>(null);
   const [manualCoords, setManualCoords] = useState<{ latitude: number; longitude: number } | null>(null);
 
-  const [markersReady, setMarkersReady] = useState(false);
+  const [resourceMarkersReady, setResourceMarkersReady] = useState(false);
+  const [eventMarkersReady, setEventMarkersReady] = useState(false);
   const sheetHeight = useRef(new Animated.Value(SHEET_COLLAPSED)).current;
 
   const availableOrganizers = useMemo(() => {
@@ -492,15 +493,17 @@ export default function Map({ route }: any) {
   const calloutTop = filterDropdownVisible ? 270 : 56;
 
   useEffect(() => {
-    const timer = setTimeout(() => setMarkersReady(true), 500);
+    setResourceMarkersReady(false);
+    const timer = setTimeout(() => setResourceMarkersReady(true), 500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [mapViewMode]);
 
   useEffect(() => {
-    if (geocodedEvents.length === 0) return;
-    const timer = setTimeout(() => setMarkersReady(true), 500);
+    if (mapViewMode !== 'events') return;
+    setEventMarkersReady(false);
+    const timer = setTimeout(() => setEventMarkersReady(true), 500);
     return () => clearTimeout(timer);
-  }, [geocodedEvents.length]);
+  }, [mapViewMode, geocodedEvents.length]);
 
   useEffect(() => {
     setOrganizerFilter(null);
@@ -601,7 +604,6 @@ export default function Map({ route }: any) {
   }
 
   function handleViewToggle(view: MapView_t) {
-      setMarkersReady(false);
     setMapViewMode(view);
     setSelectedResource(null);
     setSelectedEvent(null);
@@ -660,7 +662,7 @@ export default function Map({ route }: any) {
                 ref={(el) => (markerRefs.current[resource.id] = el)}
                 coordinate={{ latitude: resource.lat, longitude: resource.lng }}
                 onPress={() => { markerJustPressedRef.current = true; setSelectedResource(resource); setSelectedEvent(null); setFilterDropdownVisible(false); }}
-                tracksViewChanges={!markersReady || isGold}
+                tracksViewChanges={!resourceMarkersReady || isGold}
               >
                 <View style={[
                   staticStyles.customPin,
@@ -681,7 +683,7 @@ export default function Map({ route }: any) {
                 key={`evt-${event.id}`}
                 coordinate={{ latitude: event.lat!, longitude: event.lng! }}
                 onPress={() => { markerJustPressedRef.current = true; setSelectedEvent(event); setSelectedResource(null); setFilterDropdownVisible(false); }}
-                tracksViewChanges={!markersReady || isActive}
+                tracksViewChanges={!eventMarkersReady || isActive}
               >
                 <View style={[
                   staticStyles.eventPin,
