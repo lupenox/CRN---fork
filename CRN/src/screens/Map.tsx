@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Layout, Icon, useTheme } from '@ui-kitten/components';
-import { StyleSheet, View, Animated, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, Animated, ScrollView, TouchableOpacity, Text, Modal, TextInput, Alert } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { AppHeader } from '../navigation/AppHeader';
 import { mockResources } from '../data/mockData';
@@ -130,6 +130,15 @@ async function fetchRoute(
     totalDuration: leg.duration.text,
     totalDistance: leg.distance.text,
   };
+}
+
+async function geocodeAddress(address: string): Promise<{ latitude: number; longitude: number } | null> {
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!data.results?.length) return null;
+  const { lat, lng } = data.results[0].geometry.location;
+  return { latitude: lat, longitude: lng };
 }
 
 function maneuverToIcon(maneuver: string): string {
@@ -355,6 +364,30 @@ const staticStyles = StyleSheet.create({
     elevation: 5,
   },
   noEventsMsgText: { fontSize: 13, fontWeight: '500' },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    borderRadius: 16,
+    padding: 20,
+  },
+  modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 6 },
+  modalSubtitle: { fontSize: 13, marginBottom: 14 },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    marginBottom: 14,
+  },
+  modalButtons: { flexDirection: 'row', gap: 8 },
 });
 
 export default function Map({ route }: any) {
@@ -365,6 +398,7 @@ export default function Map({ route }: any) {
   const mapRef = useRef<MapView>(null);
   const markerRefs = useRef<{ [key: string]: any }>({});
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
+  const markerJustPressedRef = useRef(false);
 
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [routeData, setRouteData] = useState<RouteData | null>(null);
@@ -382,6 +416,10 @@ export default function Map({ route }: any) {
   const [organizerFilter, setOrganizerFilter] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [filterDropdownVisible, setFilterDropdownVisible] = useState(false);
+  const [manualStartVisible, setManualStartVisible] = useState(false);
+  const [manualStartInput, setManualStartInput] = useState('');
+  const [pendingTarget, setPendingTarget] = useState<any>(null);
+  const [manualCoords, setManualCoords] = useState<{ latitude: number; longitude: number } | null>(null);
 
   const sheetHeight = useRef(new Animated.Value(SHEET_COLLAPSED)).current;
 
@@ -503,22 +541,26 @@ export default function Map({ route }: any) {
   }, [activeTarget?.id]);
 
   useEffect(() => {
-    if (location && activeTarget) {
+    const origin = location
+      ? { lat: location.coords.latitude, lng: location.coords.longitude }
+      : manualCoords
+        ? { lat: manualCoords.latitude, lng: manualCoords.longitude }
+        : null;
+
+    if (origin && activeTarget) {
       setCurrentStepIndex(0);
-      fetchRoute(
-        { lat: location.coords.latitude, lng: location.coords.longitude },
-        { lat: activeTarget.lat, lng: activeTarget.lng }
-      ).then((data) => {
-        setRouteData(data);
-        if (data) {
-          Animated.spring(sheetHeight, { toValue: SHEET_COLLAPSED, useNativeDriver: false, friction: 8 }).start();
-          setSheetExpanded(false);
-        }
-      }).catch(console.error);
+      fetchRoute(origin, { lat: activeTarget.lat, lng: activeTarget.lng })
+        .then((data) => {
+          setRouteData(data);
+          if (data) {
+            Animated.spring(sheetHeight, { toValue: SHEET_COLLAPSED, useNativeDriver: false, friction: 8 }).start();
+            setSheetExpanded(false);
+          }
+        }).catch(console.error);
     } else {
       setRouteData(null);
     }
-  }, [location?.coords.latitude, location?.coords.longitude, activeTarget?.id]);
+  }, [location?.coords.latitude, location?.coords.longitude, manualCoords?.latitude, manualCoords?.longitude, activeTarget?.id]);
 
   useEffect(() => {
     if (!location || !routeData) return;
@@ -571,6 +613,10 @@ export default function Map({ route }: any) {
           showsUserLocation={true}
           showsMyLocationButton={false}
           onPress={() => {
+            if (markerJustPressedRef.current) {
+              markerJustPressedRef.current = false;
+              return;
+            }
             setSelectedResource(null);
             setSelectedEvent(null);
             setFilterDropdownVisible(false);
@@ -597,12 +643,13 @@ export default function Map({ route }: any) {
             const isGold = isSelected || isActive;
             return (
               <Marker
-                key={`res-${resource.id}-${isGold ? 'gold' : 'red'}`}
+                key={`res-${resource.id}`}
                 ref={(el) => (markerRefs.current[resource.id] = el)}
                 coordinate={{ latitude: resource.lat, longitude: resource.lng }}
-                onPress={() => { setSelectedResource(resource); setSelectedEvent(null); setFilterDropdownVisible(false); }}
+                onPress={() => { markerJustPressedRef.current = true; setSelectedResource(resource); setSelectedEvent(null); setFilterDropdownVisible(false); }}
+                tracksViewChanges={isGold}
               >
-                <View style={[
+                <View pointerEvents="none" style={[
                   staticStyles.customPin,
                   { backgroundColor: isGold ? tc.pinGoldBg : tc.pinRedBg,
                     borderColor: isGold ? tc.pinGoldBorder : tc.pinRedBorder }
@@ -620,9 +667,10 @@ export default function Map({ route }: any) {
               <Marker
                 key={`evt-${event.id}`}
                 coordinate={{ latitude: event.lat!, longitude: event.lng! }}
-                onPress={() => { setSelectedEvent(event); setSelectedResource(null); setFilterDropdownVisible(false); }}
+                onPress={() => { markerJustPressedRef.current = true; setSelectedEvent(event); setSelectedResource(null); setFilterDropdownVisible(false); }}
+                tracksViewChanges={isActive}
               >
-                <View style={[
+                <View pointerEvents="none" style={[
                   staticStyles.eventPin,
                   {
                     backgroundColor: isActive ? tc.pinTealActiveBg : tc.pinTealBg,
@@ -640,15 +688,9 @@ export default function Map({ route }: any) {
             <Marker
               key={`temp-${activeTarget.id}`}
               coordinate={{ latitude: activeTarget.lat, longitude: activeTarget.lng }}
-              onPress={() => setSelectedResource({
-                id: activeTarget.id,
-                lat: activeTarget.lat,
-                lng: activeTarget.lng,
-                title: activeTarget.title,
-                location: '',
-              })}
+              onPress={() => { markerJustPressedRef.current = true; setSelectedResource({ id: activeTarget.id, lat: activeTarget.lat, lng: activeTarget.lng, title: activeTarget.title, location: '' }); }}
             >
-              <View style={[staticStyles.customPin, { backgroundColor: tc.pinGoldBg, borderColor: tc.pinGoldBorder }]}>
+              <View pointerEvents="none" style={[staticStyles.customPin, { backgroundColor: tc.pinGoldBg, borderColor: tc.pinGoldBorder }]}>
                 <View style={[staticStyles.customPinDot, { backgroundColor: tc.pinGoldBorder }]} />
               </View>
             </Marker>
@@ -800,8 +842,15 @@ export default function Map({ route }: any) {
             <TouchableOpacity
               style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg }]}
               onPress={() => {
-                setActiveTarget({ id: selectedResource.id, lat: selectedResource.lat, lng: selectedResource.lng, title: selectedResource.title });
-                setSelectedResource(null);
+                const target = { id: selectedResource.id, lat: selectedResource.lat, lng: selectedResource.lng, title: selectedResource.title };
+                if (!location) {
+                  setPendingTarget(target);
+                  setManualStartInput('');
+                  setManualStartVisible(true);
+                } else {
+                  setActiveTarget(target);
+                  setSelectedResource(null);
+                }
               }}
             >
               <Icon name="navigation-2-outline" style={staticStyles.calloutIcon} fill={tc.navIconFill} />
@@ -828,8 +877,15 @@ export default function Map({ route }: any) {
             <TouchableOpacity
               style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg }]}
               onPress={() => {
-                setActiveTarget({ id: selectedEvent.id, lat: selectedEvent.lat, lng: selectedEvent.lng, title: selectedEvent.title });
-                setSelectedEvent(null);
+                const target = { id: selectedEvent.id, lat: selectedEvent.lat, lng: selectedEvent.lng, title: selectedEvent.title };
+                if (!location) {
+                  setPendingTarget(target);
+                  setManualStartInput('');
+                  setManualStartVisible(true);
+                } else {
+                  setActiveTarget(target);
+                  setSelectedEvent(null);
+                }
               }}
             >
               <Icon name="navigation-2-outline" style={staticStyles.calloutIcon} fill={tc.navIconFill} />
@@ -858,11 +914,11 @@ export default function Map({ route }: any) {
         {/* Navigation bottom sheet */}
         {routeData && currentStep && (
           <Animated.View style={[staticStyles.bottomSheet, { height: sheetHeight, backgroundColor: tc.bottomSheetBg }]}>
-            <View style={staticStyles.sheetHeader}>
+            <TouchableOpacity onPress={toggleSheet} style={staticStyles.sheetHeader} activeOpacity={1}>
               <View style={staticStyles.stopButtonSpacer} />
-              <TouchableOpacity onPress={toggleSheet} style={staticStyles.sheetHandleTouchable}>
+              <View style={staticStyles.sheetHandleTouchable}>
                 <View style={[staticStyles.handleBar, { backgroundColor: tc.handleBarBg }]} />
-              </TouchableOpacity>
+              </View>
               <TouchableOpacity
                 style={staticStyles.stopButton}
                 onPress={() => {
@@ -870,12 +926,13 @@ export default function Map({ route }: any) {
                   setRouteData(null);
                   setCurrentStepIndex(0);
                   setSheetExpanded(false);
+                  setManualCoords(null);
                 }}
               >
                 <Icon name="close-circle-outline" style={staticStyles.stopIcon} fill={tc.stopTextColor} />
                 <Text style={[staticStyles.stopText, { color: tc.stopTextColor }]}>End</Text>
               </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
 
             <View style={staticStyles.currentStep}>
               <Icon
@@ -943,6 +1000,57 @@ export default function Map({ route }: any) {
           </Animated.View>
         )}
       </View>
+
+      {/* Manual start location modal */}
+      <Modal
+        visible={manualStartVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setManualStartVisible(false)}
+      >
+        <View style={staticStyles.modalOverlay}>
+          <View style={[staticStyles.modalCard, { backgroundColor: tc.floatingCalloutBg }]}>
+            <Text style={[staticStyles.modalTitle, { color: tc.calloutTitleColor }]}>Enter Starting Location</Text>
+            <Text style={[staticStyles.modalSubtitle, { color: tc.calloutSubtitleColor }]}>
+              Location access is unavailable. Enter your starting address to navigate.
+            </Text>
+            <TextInput
+              style={[staticStyles.modalInput, { color: tc.calloutTitleColor, borderColor: tc.handleBarBg }]}
+              placeholder="e.g. 3200 N Cramer St, Milwaukee"
+              placeholderTextColor={tc.calloutSubtitleColor}
+              value={manualStartInput}
+              onChangeText={setManualStartInput}
+              autoFocus
+            />
+            <View style={staticStyles.modalButtons}>
+              <TouchableOpacity
+                style={[staticStyles.calloutButton, { flex: 1 }]}
+                onPress={() => setManualStartVisible(false)}
+              >
+                <Text style={{ color: tc.calloutSubtitleColor }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[staticStyles.calloutButton, { flex: 1, backgroundColor: tc.calloutButtonBg }]}
+                onPress={async () => {
+                  if (!manualStartInput.trim()) return;
+                  const coords = await geocodeAddress(manualStartInput.trim());
+                  if (!coords) {
+                    Alert.alert('Location Not Found', 'Could not find that address. Please try again.');
+                    return;
+                  }
+                  setManualCoords(coords);
+                  setActiveTarget(pendingTarget);
+                  setSelectedResource(null);
+                  setSelectedEvent(null);
+                  setManualStartVisible(false);
+                }}
+              >
+                <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>Go</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Layout>
   );
 }
