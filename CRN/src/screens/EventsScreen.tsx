@@ -9,7 +9,7 @@ import {
 import { Layout, Text, Icon, useTheme } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
 import eventsData from '../../scripts/events_geocoded.json';
-
+import { useRecentlySearched } from '../context/RecentlySearchedContext';
 // Types
 type DateFilter = 'all' | 'today' | '3days' | 'week';
 
@@ -58,18 +58,29 @@ function isSoon(dateStr: string): boolean {
   return diff >= 0 && diff <= 3;
 }
 
-const allEvents: Event[] = (eventsData as any[]).map((e, i) => ({
+const allEvents: Event[] = (eventsData as any[]).filter((e) => isValidEventDate(e.date)).map((e, i) => ({
   ...e,
   id: `event-${i}`,
 }));
 
+function isValidEventDate(dateStr: string): boolean {
+  if (!dateStr || typeof dateStr !== 'string') return false;
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return false;
+  const [m, d, y] = parts.map(Number);
+  if (isNaN(m) || isNaN(d) || isNaN(y)) return false;
+  if (m < 1 || m > 12 || d < 1 || d > 31 || y < 2000) return false;
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+}
+
 // Main Screen
-export default function EventsScreen({ navigation }: any) {
+export default function EventsScreen({ navigation, route }: any) {
   const theme = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(route?.params?.initialQuery ?? '');
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
   const [sortAsc, setSortAsc] = useState(true);
-
+  const { addRecentSearch } = useRecentlySearched();
   const tc = {
     bg:           theme['color-basic-800'],
     surface:      theme['color-basic-700'],
@@ -153,6 +164,9 @@ export default function EventsScreen({ navigation }: any) {
           placeholderTextColor={tc.hint}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onBlur={() => {
+            if (searchQuery.trim()) addRecentSearch(searchQuery.trim(), 'Events');
+          }}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')}>

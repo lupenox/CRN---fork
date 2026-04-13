@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import {
   Layout, Text, Input, Icon, Spinner, useTheme,
@@ -7,6 +7,8 @@ import { useNavigation } from '@react-navigation/native';
 import { AppHeader } from '../navigation/AppHeader';
 import Card from '../components/Card';
 import { searchCourses } from '../services/courseService';
+
+import { useRecentlySearched } from '../context/RecentlySearchedContext';
 
 const SearchIcon  = (props) => <Icon {...props} name="search-outline" />;
 const ChevronIcon = (props) => <Icon {...props} name="chevron-right-outline" />;
@@ -31,7 +33,6 @@ function CourseGroupCard({ group, onPress, theme }) {
   if (labCount)     summaryParts.push(`${labCount} lab${labCount > 1 ? 's' : ''}`);
   const otherCount = group.sections.length - lectureCount - labCount;
   if (otherCount)   summaryParts.push(`${otherCount} other`);
-
   return (
     <Card style={styles.card} onPress={() => onPress(group)}>
       <View style={styles.cardRow}>
@@ -48,31 +49,36 @@ function CourseGroupCard({ group, onPress, theme }) {
   );
 }
 
-export default function ClassSearchScreen() {
+export default function ClassSearchScreen({ route }: any) {
   const navigation = useNavigation();
   const theme      = useTheme();
+  const { addRecentSearch } = useRecentlySearched();
 
-  const [query,    setQuery]    = useState('');
+  const [query, setQuery] = useState(route?.params?.initialQuery ?? '');
+  useEffect(() => {
+    if (route?.params?.initialQuery) handleSearch();
+  }, []);
   const [rawResults, setRawResults] = useState([]);
   const [loading,  setLoading]  = useState(false);
   const [searched, setSearched] = useState(false);
 
   const grouped = useMemo(() => groupByCourse(rawResults), [rawResults]);
 
-  const handleSearch = useCallback(async () => {
-    if (!query.trim()) return;
-    setLoading(true);
-    setSearched(true);
-    try {
-      const data = await searchCourses(query.trim(), '');
-      setRawResults(data);
-    } catch (e) {
-      console.error(e);
-      setRawResults([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [query]);
+const handleSearch = useCallback(async () => {
+  if (!query.trim()) return;
+  setLoading(true);
+  setSearched(true);
+  addRecentSearch(query.trim(), 'Classes');
+  try {
+    const data = await searchCourses(query.trim(), '');
+    setRawResults(data);
+  } catch (e) {
+    console.error(e);
+    setRawResults([]);
+  } finally {
+    setLoading(false);
+  }
+}, [query, addRecentSearch]);
 
   const renderEmpty = () => {
     if (loading) return null;
