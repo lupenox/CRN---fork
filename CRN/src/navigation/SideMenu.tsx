@@ -5,6 +5,7 @@ import { Layout, Text, Divider, Icon } from '@ui-kitten/components';
 import { useNavigation } from '@react-navigation/native';
 import { SideMenuContext } from './SideMenuContext';
 import Button from '../components/Button';
+import { useAuth0 } from 'react-native-auth0';
 
 const NAV_ITEMS = [
   { label: 'Home',       route: 'Home',      icon: 'home-outline'                 },
@@ -23,6 +24,8 @@ export default function SideMenu() {
   const { isOpen, closeMenu } = useContext(SideMenuContext);
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  const { clearSession } = useAuth0();
 
   const PANEL_WIDTH = Math.round(Dimensions.get('window').width * 0.4);
 
@@ -64,9 +67,17 @@ export default function SideMenu() {
 
   if (!visible) return null;
 
-  function goTo(route) {
+  async function goTo(route) {
     closeMenu();
-    navigation.navigate(route);
+    if (route === 'Login') {
+      try {
+        await clearSession();
+      } catch (e) {
+        console.error("Failed to log out:", e);
+      }
+    } else {
+      navigation.navigate(route);
+    }
   }
 
   return (
