@@ -1,5 +1,5 @@
-import { Modal, TextInput } from 'react-native';
-import { useState } from 'react';
+import { Modal, TextInput, Animated } from 'react-native';
+import { useState, useRef } from 'react';
 import React from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
@@ -36,6 +36,10 @@ export default function EventDetailScreen({ route, navigation }: any) {
   const { event }: { event: Event } = route.params ?? {};
   const [reviewVisible, setReviewVisible] = useState(false);
   const [rating, setRating] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+  const starScales = useRef(
+    [1, 2, 3, 4, 5].map(() => new Animated.Value(1))
+  ).current;
   const [message, setMessage] = useState('');
   const tc = {
     bg:       theme['color-basic-800'],
@@ -45,6 +49,21 @@ export default function EventDetailScreen({ route, navigation }: any) {
     hint:     theme['text-hint-color'],
     primary:  theme['color-primary-500'],
     info:     theme['color-info-500'],
+  };
+
+  const animateStar = (index: number) => {
+    Animated.sequence([
+      Animated.timing(starScales[index], {
+        toValue: 1.4,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.timing(starScales[index], {
+        toValue: 1,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   if (!event) {
@@ -148,53 +167,87 @@ export default function EventDetailScreen({ route, navigation }: any) {
               Leave a Review
             </Text>
 
-            {/* Stars */}
-            <View style={styles.starsRow}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <TouchableOpacity key={star} onPress={() => setRating(star)}>
-                  <Icon
-                    name={star <= rating ? "star" : "star-outline"}
-                    fill={tc.primary}
-                    style={styles.starIcon}
-                  />
-                </TouchableOpacity>
-              ))}
-            </View>
+            {submitted ? (
+              <View style={styles.successContainer}>
+                <Icon
+                  name="checkmark-circle-2-outline"
+                  fill={tc.primary}
+                  style={{ width: 40, height: 40 }}
+                />
+                <Text style={{ color: tc.text, marginTop: 8 }}>
+                  Review submitted!
+                </Text>
+              </View>
+            ) : (
+              <>
+                {/* Stars */}
+                <View style={styles.starsRow}>
+                  {[1, 2, 3, 4, 5].map((star, index) => (
+                    <TouchableOpacity
+                      key={star}
+                      onPress={() => {
+                        setRating(star);
+                        animateStar(index);
+                      }}
+                    >
+                      <Animated.View style={{ transform: [{ scale: starScales[index] }] }}>
+                        <Icon
+                          name={star <= rating ? "star" : "star-outline"}
+                          fill={tc.primary}
+                          style={styles.starIcon}
+                        />
+                      </Animated.View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
 
-            {/* Message */}
-            <TextInput
-              placeholder="Write a review..."
-              placeholderTextColor={tc.hint}
-              value={message}
-              onChangeText={setMessage}
-              multiline
-              style={[
-                styles.input,
-                { color: tc.text, borderColor: tc.border }
-              ]}
-            />
+                {/* Message */}
+                <TextInput
+                  placeholder="Write a review..."
+                  placeholderTextColor={tc.hint}
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                  style={[
+                    styles.input,
+                    { color: tc.text, borderColor: tc.border }
+                  ]}
+                />
 
-            {/* Actions */}
-            <View style={styles.modalActions}>
-              <Button
-                appearance="ghost"
-                onPress={() => setReviewVisible(false)}
-              >
-                Cancel
-              </Button>
+                {/* Actions */}
+                <View style={styles.modalActions}>
+                  <Button
+                    appearance="ghost"
+                    onPress={() => {
+                      setReviewVisible(false);
+                      setRating(0);
+                      setMessage('');
+                      setSubmitted(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
 
-              <Button
-                onPress={() => {
-                  console.log({ rating, message }); // does nothing for now
-                  setReviewVisible(false);
-                  setRating(0);
-                  setMessage('');
-                }}
-              >
-                Submit
-              </Button>
-            </View>
+                  <Button
+                    disabled={rating === 0}
+                    onPress={() => {
+                      console.log({ rating, message });
 
+                      setSubmitted(true);
+
+                      setTimeout(() => {
+                        setSubmitted(false);
+                        setReviewVisible(false);
+                        setRating(0);
+                        setMessage('');
+                      }, 1200);
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </View>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -253,6 +306,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     overflow: 'hidden',
+  },
+  successContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
   },
   infoRow: {
     flexDirection: 'row',
