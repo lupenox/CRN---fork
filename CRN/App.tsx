@@ -18,7 +18,7 @@ import { Auth0Provider, useAuth0 } from 'react-native-auth0';
 
 // Context Providers
 import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
-import { RecentlyViewedProvider } from './src/context/RecentlyViewedContext';
+import { RecentlySearchedProvider  } from './src/context/RecentlySearchedContext';
 
 // Screens
 import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
@@ -104,11 +104,11 @@ export default function App() {
                   <IconRegistry icons={EvaIconsPack} />
                   
                   {/* New RecentlyViewedProvider added here */}
-                  <RecentlyViewedProvider>
+                  <RecentlySearchedProvider>
                     <SideMenuProvider>
                       <RootNavigator />
                     </SideMenuProvider>
-                  </RecentlyViewedProvider>
+                  </RecentlySearchedProvider>
 
                 </SafeAreaProvider>
               </ApplicationProvider>

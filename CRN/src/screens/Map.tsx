@@ -496,14 +496,14 @@ export default function Map({ route }: any) {
     setResourceMarkersReady(false);
     const timer = setTimeout(() => setResourceMarkersReady(true), 500);
     return () => clearTimeout(timer);
-  }, [mapViewMode]);
+  }, [mapViewMode, categoryFilter]);
 
   useEffect(() => {
     if (mapViewMode !== 'events') return;
     setEventMarkersReady(false);
     const timer = setTimeout(() => setEventMarkersReady(true), 500);
     return () => clearTimeout(timer);
-  }, [mapViewMode, geocodedEvents.length]);
+  }, [mapViewMode, geocodedEvents.length, dateFilter, organizerFilter]);
 
   useEffect(() => {
     setOrganizerFilter(null);
