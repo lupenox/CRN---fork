@@ -1,3 +1,5 @@
+import { Modal, TextInput } from 'react-native';
+import { useState } from 'react';
 import React from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
@@ -32,7 +34,9 @@ function formatDateLong(dateStr: string): string {
 export default function EventDetailScreen({ route, navigation }: any) {
   const theme = useTheme();
   const { event }: { event: Event } = route.params ?? {};
-
+  const [reviewVisible, setReviewVisible] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [message, setMessage] = useState('');
   const tc = {
     bg:       theme['color-basic-800'],
     surface:  theme['color-basic-700'],
@@ -123,10 +127,77 @@ export default function EventDetailScreen({ route, navigation }: any) {
           >
             {hasCoords ? 'View on Map' : 'Show on Map'}
           </Button>
+
+          <Button
+            style={styles.actionBtn}
+            onPress={() => setReviewVisible(true)}
+            accessoryLeft={(props) => <Icon {...props} name="star-outline" />}
+          >
+            Leave a Review
+          </Button>
+
         </View>
 
         <View style={{ height: 32 }} />
       </ScrollView>
+      <Modal visible={reviewVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { backgroundColor: tc.surface }]}>
+
+            <Text style={[styles.modalTitle, { color: tc.text }]}>
+              Leave a Review
+            </Text>
+
+            {/* Stars */}
+            <View style={styles.starsRow}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity key={star} onPress={() => setRating(star)}>
+                  <Icon
+                    name={star <= rating ? "star" : "star-outline"}
+                    fill={tc.primary}
+                    style={styles.starIcon}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Message */}
+            <TextInput
+              placeholder="Write a review..."
+              placeholderTextColor={tc.hint}
+              value={message}
+              onChangeText={setMessage}
+              multiline
+              style={[
+                styles.input,
+                { color: tc.text, borderColor: tc.border }
+              ]}
+            />
+
+            {/* Actions */}
+            <View style={styles.modalActions}>
+              <Button
+                appearance="ghost"
+                onPress={() => setReviewVisible(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                onPress={() => {
+                  console.log({ rating, message }); // does nothing for now
+                  setReviewVisible(false);
+                  setRating(0);
+                  setMessage('');
+                }}
+              >
+                Submit
+              </Button>
+            </View>
+
+          </View>
+        </View>
+      </Modal>
     </Layout>
   );
 }
@@ -213,4 +284,49 @@ const styles = StyleSheet.create({
 
   actions:   { gap: 10, marginTop: 4 },
   actionBtn: { width: '100%' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
+  modalCard: {
+    width: '100%',
+    borderRadius: 16,
+    padding: 16,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+
+  starsRow: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    gap: 6,
+  },
+
+  starIcon: {
+    width: 28,
+    height: 28,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    marginBottom: 12,
+  },
+
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
 });
