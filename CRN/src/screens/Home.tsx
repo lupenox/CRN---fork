@@ -359,7 +359,6 @@ function SectionTile({ icon, iconColor, title, subtitle, actionLabel, onAction, 
     </View>
   );
 }
-
 // Styles
 const styles = StyleSheet.create({
   root:  { flex: 1 },
