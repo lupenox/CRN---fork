@@ -68,6 +68,7 @@
         "name": "users",
         "allowedColumns": [
             "id",
+            "auth0_id",
             "name",
             "email",
             "type"

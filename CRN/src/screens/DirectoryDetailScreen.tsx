@@ -4,16 +4,10 @@ import { ScrollView, Linking, TouchableOpacity } from 'react-native';
 import { SideMenuContext } from '../navigation/SideMenuContext';
 import { AppHeader } from '../navigation/AppHeader';
 import Button from '../components/Button';
-import { useRecentlyViewed } from '../context/RecentlyViewedContext';
 
 export default function DirectoryDetailScreen({ route, navigation })
 {
     const { event } = route.params ?? {};
-    const { addRecentResource } = useRecentlyViewed();
-
-    useEffect(() => {
-        if (event) addRecentResource(event);
-    }, []);
     if(!event)
     {
         return(
