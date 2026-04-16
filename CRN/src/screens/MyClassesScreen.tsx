@@ -27,7 +27,20 @@ function ClassRow({ section, onPress, theme }) {
   };
 
   const location = section.room ?? section.campus ?? null;
+  const SCHD_LABEL: Record<string, string> = {
+    LEC: 'Lecture', LAB: 'Lab', SEM: 'Seminar',
+    IND: 'Independent', DIS: 'Discussion',
+  };
 
+  function getBadgeColors(schedType: string, theme: Record<string, string>) {
+    switch (schedType) {
+      case 'LEC': return { bg: theme['color-info-100'],    text: theme['color-info-700']    };
+      case 'LAB': return { bg: theme['color-warning-100'], text: theme['color-warning-700'] };
+      case 'SEM': return { bg: theme['color-success-100'], text: theme['color-success-700'] };
+      case 'IND': return { bg: theme['color-basic-200'],   text: theme['color-basic-600']   };
+      default:    return { bg: theme['color-primary-100'], text: theme['color-primary-700'] };
+    }
+  }
   return (
     <TouchableOpacity
       style={[styles.row, { borderColor: tc.border }]}
@@ -36,9 +49,17 @@ function ClassRow({ section, onPress, theme }) {
     >
       <View style={[styles.accent, { backgroundColor: tc.warning }]} />
       <View style={styles.rowBody}>
-        <Text style={[styles.courseCode, { color: tc.text }]} numberOfLines={1}>
-          {section.course_code} — {section.title}
-        </Text>
+        {/* Badge + course code on the same line */}
+        <View style={styles.titleRow}>
+          <View style={[styles.badge, { backgroundColor: getBadgeColors(section.schedule_type, theme).bg }]}>
+            <Text style={[styles.badgeText, { color: getBadgeColors(section.schedule_type, theme).text }]}>
+              {SCHD_LABEL[section.schedule_type] ?? section.schedule_type}
+            </Text>
+          </View>
+          <Text style={[styles.courseCode, { color: tc.text }]} numberOfLines={1}>
+            {section.course_code} — {section.title}
+          </Text>
+        </View>
 
         <View style={styles.metaRow}>
           <Icon name="pin-outline" style={styles.metaIcon} fill={tc.hint} />
@@ -129,4 +150,7 @@ const styles = StyleSheet.create({
   metaIcon:   { width: 13, height: 13 },
   metaMeta:   { fontSize: 12, flex: 1 },
   chevron:    { width: 18, height: 18, marginRight: 10 },
+  titleRow:  { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
+  badge:     { borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
+  badgeText: { fontSize: 10, fontWeight: '700' },
 });

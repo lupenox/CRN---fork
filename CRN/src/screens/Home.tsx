@@ -55,6 +55,22 @@ export default function Home({ navigation }: any) {
   const { recentSearches, clearRecentSearches  } = useRecentlySearched();
   const now = new Date();
   const hour = now.getHours();
+
+  const SCHD_LABEL: Record<string, string> = {
+    LEC: 'Lecture', LAB: 'Lab', SEM: 'Seminar',
+    IND: 'Independent', DIS: 'Discussion',
+  };
+
+  function getBadgeColors(schedType: string, theme: Record<string, string>) {
+    switch (schedType) {
+      case 'LEC': return { bg: theme['color-info-100'],    text: theme['color-info-700']    };
+      case 'LAB': return { bg: theme['color-warning-100'], text: theme['color-warning-700'] };
+      case 'SEM': return { bg: theme['color-success-100'], text: theme['color-success-700'] };
+      case 'IND': return { bg: theme['color-basic-200'],   text: theme['color-basic-600']   };
+      default:    return { bg: theme['color-primary-100'], text: theme['color-primary-700'] };
+    }
+  }
+
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const { enrolledClasses } = useEnrolledClasses();
   const tc = {
@@ -156,7 +172,7 @@ export default function Home({ navigation }: any) {
               </Text>
             </View>
           ) : (
-            enrolledClasses.slice(0, 3).map((section) => (
+            enrolledClasses.slice(0, 5).map((section) => (
               <TouchableOpacity
                 key={section.crn}
                 style={[styles.listRow, { borderColor: tc.border }]}
@@ -165,9 +181,21 @@ export default function Home({ navigation }: any) {
               >
                 <View style={[styles.listAccent, { backgroundColor: tc.warning }]} />
                 <View style={styles.listBody}>
-                  <Text style={[styles.listTitle, { color: tc.text }]} numberOfLines={1}>
-                    {section.course_code} · {section.title}
-                  </Text>
+                  <View style={styles.listTitleRow}>
+                      {(() => {
+                        const { bg, text } = getBadgeColors(section.schedule_type, theme);
+                        return (
+                          <View style={[styles.listBadge, { backgroundColor: bg }]}>
+                            <Text style={[styles.listBadgeText, { color: text }]}>
+                              {SCHD_LABEL[section.schedule_type] ?? section.schedule_type}
+                            </Text>
+                          </View>
+                        );
+                      })()}
+                      <Text style={[styles.listTitle, { color: tc.text, flex: 1 }]} numberOfLines={1}>
+                        {section.course_code} · {section.title}
+                      </Text>
+                    </View>
                   <View style={styles.listMeta}>
                     <Icon name="pin-outline" style={styles.listMetaIcon} fill={tc.hint} />
                     <Text style={[styles.listMetaText, { color: tc.hint }]} numberOfLines={1}>
@@ -433,4 +461,7 @@ const styles = StyleSheet.create({
   },
   emptySlotIcon: { width: 24, height: 24 },
   emptySlotText: { fontSize: 13 },
+  listTitleRow:  { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 },
+  listBadge:     { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
+  listBadgeText: { fontSize: 10, fontWeight: '700' },
 });
