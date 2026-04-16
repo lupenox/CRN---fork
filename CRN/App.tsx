@@ -39,6 +39,8 @@ import SideMenu from './src/navigation/SideMenu.tsx';
 import Map from './src/screens/Map.tsx';
 import Home from './src/screens/Home.tsx';
 
+import { EnrolledClassesProvider } from './src/context/EnrolledClassesContext';
+
 const Stack = createNativeStackNavigator();
 
 // 1. Create a Root Navigator to handle the Auth0 conditional logic
@@ -105,9 +107,11 @@ export default function App() {
                   
                   {/* New RecentlyViewedProvider added here */}
                   <RecentlySearchedProvider>
+                   <EnrolledClassesProvider>
                     <SideMenuProvider>
                       <RootNavigator />
                     </SideMenuProvider>
+                   </EnrolledClassesProvider>
                   </RecentlySearchedProvider>
 
                 </SafeAreaProvider>

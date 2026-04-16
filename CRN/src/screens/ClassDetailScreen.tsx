@@ -5,6 +5,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { AppHeader } from '../navigation/AppHeader';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import { useEnrolledClasses } from '../context/EnrolledClassesContext';
 
 const PersonIcon = (props) => <Icon {...props} name="person-outline" />;
 const HashIcon   = (props) => <Icon {...props} name="hash-outline" />;
@@ -77,7 +78,8 @@ export default function ClassDetailScreen() {
   const hintColor  = theme['text-hint-color'];
 
   const { course } = route.params as { course: any };
-
+  const { addClass, removeClass, isEnrolled } = useEnrolledClasses();
+  const enrolled = isEnrolled(course.crn);
   const scheduleLabel = SCHD_LABEL[course.schedule_type] ?? course.schedule_type;
   const { bg, text }  = getBadgeColors(course.schedule_type, theme);
 
@@ -175,6 +177,14 @@ const locationString = (course.room || course.campus)?.toLowerCase().includes('o
           <Divider style={styles.divider} />
           <MeetingPills times={course.meeting_times} theme={theme} />
         </Card>
+
+        <Button
+          style={styles.addBtn}
+          status={enrolled ? 'danger' : 'primary'}
+          onPress={() => enrolled ? removeClass(course.crn) : addClass(course)}
+        >
+          {enrolled ? 'Remove Class' : 'Add Class'}
+        </Button>
 
       </ScrollView>
     </Layout>

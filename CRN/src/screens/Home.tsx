@@ -5,6 +5,8 @@ import { AppHeader } from '../navigation/AppHeader';
 import { mockResources } from '../data/mockData';
 import eventsData from '../../scripts/events_geocoded.json';
 import { useRecentlySearched } from '../context/RecentlySearchedContext';
+import { useEnrolledClasses } from '../context/EnrolledClassesContext';
+
 type Event = {
   id: string;
   title: string;
@@ -54,7 +56,7 @@ export default function Home({ navigation }: any) {
   const now = new Date();
   const hour = now.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-
+  const { enrolledClasses } = useEnrolledClasses();
   const tc = {
     bg:          theme['color-basic-800'],
     surface:     theme['color-basic-700'],
@@ -146,12 +148,45 @@ export default function Home({ navigation }: any) {
           onAction={() => navigation.navigate('Classes')}
           tc={tc}
         >
-          <View style={[styles.emptySlot, { borderColor: tc.border }]}>
-            <Icon name="plus-outline" style={styles.emptySlotIcon} fill={tc.hint} />
-            <Text style={[styles.emptySlotText, { color: tc.hint }]}>
-              Add classes to see them here
-            </Text>
-          </View>
+          {enrolledClasses.length === 0 ? (
+            <View style={[styles.emptySlot, { borderColor: tc.border }]}>
+              <Icon name="plus-outline" style={styles.emptySlotIcon} fill={tc.hint} />
+              <Text style={[styles.emptySlotText, { color: tc.hint }]}>
+                Add classes to see them here
+              </Text>
+            </View>
+          ) : (
+            enrolledClasses.slice(0, 3).map((section) => (
+              <TouchableOpacity
+                key={section.crn}
+                style={[styles.listRow, { borderColor: tc.border }]}
+                onPress={() => navigation.navigate('ClassDetail', { course: section })}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.listAccent, { backgroundColor: tc.warning }]} />
+                <View style={styles.listBody}>
+                  <Text style={[styles.listTitle, { color: tc.text }]} numberOfLines={1}>
+                    {section.course_code} · {section.title}
+                  </Text>
+                  <View style={styles.listMeta}>
+                    <Icon name="pin-outline" style={styles.listMetaIcon} fill={tc.hint} />
+                    <Text style={[styles.listMetaText, { color: tc.hint }]} numberOfLines={1}>
+                      {section.room ?? section.campus ?? 'TBA'}
+                    </Text>
+                  </View>
+                  <View style={styles.listMeta}>
+                    <Icon name="clock-outline" style={styles.listMetaIcon} fill={tc.hint} />
+                    <Text style={[styles.listMetaText, { color: tc.hint }]} numberOfLines={1}>
+                      {section.meets ?? section.meeting_times?.[0]
+                        ? `${section.meeting_times[0].day} ${section.meeting_times[0].start_time}–${section.meeting_times[0].end_time}`
+                        : 'No meeting pattern'}
+                    </Text>
+                  </View>
+                </View>
+                <Icon name="chevron-right-outline" style={styles.listChevron} fill={tc.border} />
+              </TouchableOpacity>
+            ))
+          )}
         </SectionTile>
 
         {/* Today's Events tile */}

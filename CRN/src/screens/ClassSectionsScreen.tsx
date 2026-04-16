@@ -4,6 +4,7 @@ import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AppHeader } from '../navigation/AppHeader';
 import Card from '../components/Card';
+import { useEnrolledClasses } from '../context/EnrolledClassesContext';
 
 const ClockIcon   = (props) => <Icon {...props} name="clock-outline" />;
 const PersonIcon  = (props) => <Icon {...props} name="person-outline" />;
@@ -29,6 +30,7 @@ function SectionCard({ section, onPress, theme }) {
   const hintColor    = theme['text-hint-color'];
   const hasTime      = section.meets && section.meets !== 'No Meeting Pattern';
   const { bg, text } = getBadgeColors(section.schedule_type, theme);
+  const { isEnrolled } = useEnrolledClasses();
 
   return (
     <Card style={styles.card} onPress={() => onPress(section)}>
@@ -66,7 +68,10 @@ function SectionCard({ section, onPress, theme }) {
           ) : null}
         </View>
 
-        <ChevronIcon style={styles.chevron} fill={hintColor} />
+        {isEnrolled(section.crn)
+          ? <Icon name="checkmark-circle-2-outline" style={styles.checkIcon} fill={theme['color-success-500']} />
+          : <ChevronIcon style={styles.chevron} fill={hintColor} />
+        }
       </View>
     </Card>
   );

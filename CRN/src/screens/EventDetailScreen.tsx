@@ -1,10 +1,13 @@
 import { Modal, TextInput, Animated } from 'react-native';
-import { useState, useRef } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useRef, useEffect } from 'react';
 import React from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
 import Button from '../components/Button';
+
+const reviewedEventIds = new Set<string>();
 
 type Event = {
   id: string;
@@ -37,6 +40,7 @@ export default function EventDetailScreen({ route, navigation }: any) {
   const [reviewVisible, setReviewVisible] = useState(false);
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
   const starScales = useRef(
     [1, 2, 3, 4, 5].map(() => new Animated.Value(1))
   ).current;
@@ -51,6 +55,12 @@ export default function EventDetailScreen({ route, navigation }: any) {
     info:     theme['color-info-500'],
   };
 
+  useEffect(() => {
+    if (event?.id && reviewedEventIds.has(event.id)) {
+      setHasReviewed(true);
+    }
+  }, [event?.id]);
+
   const animateStar = (index: number) => {
     Animated.sequence([
       Animated.timing(starScales[index], {
@@ -64,6 +74,22 @@ export default function EventDetailScreen({ route, navigation }: any) {
         useNativeDriver: true,
       }),
     ]).start();
+  };
+
+  const handleSubmitReview = () => {
+    console.log({ rating, message });
+
+    reviewedEventIds.add(event.id);
+
+    setSubmitted(true);
+    setHasReviewed(true);
+
+    setTimeout(() => {
+      setSubmitted(false);
+      setReviewVisible(false);
+      setRating(0);
+      setMessage('');
+    }, 1200);
   };
 
   if (!event) {
@@ -149,10 +175,13 @@ export default function EventDetailScreen({ route, navigation }: any) {
 
           <Button
             style={styles.actionBtn}
+            disabled={hasReviewed}
             onPress={() => setReviewVisible(true)}
-            accessoryLeft={(props) => <Icon {...props} name="star-outline" />}
+            accessoryLeft={(props) => (
+              <Icon {...props} name={hasReviewed ? 'star' : 'star-outline'} />
+            )}
           >
-            Leave a Review
+            {hasReviewed ? 'Already Reviewed' : 'Leave a Review'}
           </Button>
 
         </View>
@@ -230,18 +259,7 @@ export default function EventDetailScreen({ route, navigation }: any) {
 
                   <Button
                     disabled={rating === 0}
-                    onPress={() => {
-                      console.log({ rating, message });
-
-                      setSubmitted(true);
-
-                      setTimeout(() => {
-                        setSubmitted(false);
-                        setReviewVisible(false);
-                        setRating(0);
-                        setMessage('');
-                      }, 1200);
-                    }}
+                    onPress={handleSubmitReview}
                   >
                     Submit
                   </Button>
