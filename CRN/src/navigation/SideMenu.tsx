@@ -71,7 +71,7 @@ export default function SideMenu() {
     closeMenu();
     if (route === 'Login') {
       try {
-        await clearSession({customScheme: 'crnapp'});
+        await clearSession();
       } catch (e) {
         console.error("Failed to log out:", e);
       }

@@ -14,8 +14,7 @@ export default function Login() {
         additionalParameters: {
           prompt: 'select_account',
         },
-      },
-      { customScheme: 'crnapp', }
+      }
     );
     } catch (e) {
       console.error('Login error:', e);
