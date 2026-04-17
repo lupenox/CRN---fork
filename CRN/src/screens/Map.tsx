@@ -390,7 +390,7 @@ const staticStyles = StyleSheet.create({
   modalButtons: { flexDirection: 'row', gap: 8 },
 });
 
-export default function Map({ route }: any) {
+export default function Map({ route, navigation }: any) {
   const { resolvedTheme } = useAppTheme();
   const isDarkMode = resolvedTheme === 'dark';
   const theme = useTheme();
@@ -496,14 +496,14 @@ export default function Map({ route }: any) {
     setResourceMarkersReady(false);
     const timer = setTimeout(() => setResourceMarkersReady(true), 500);
     return () => clearTimeout(timer);
-  }, [mapViewMode]);
+  }, [mapViewMode, categoryFilter]);
 
   useEffect(() => {
     if (mapViewMode !== 'events') return;
     setEventMarkersReady(false);
     const timer = setTimeout(() => setEventMarkersReady(true), 500);
     return () => clearTimeout(timer);
-  }, [mapViewMode, geocodedEvents.length]);
+  }, [mapViewMode, geocodedEvents.length, dateFilter, organizerFilter]);
 
   useEffect(() => {
     setOrganizerFilter(null);
@@ -848,16 +848,36 @@ export default function Map({ route }: any) {
         {/* Floating callout — resource */}
         {selectedResource && (
           <View style={[staticStyles.floatingCallout, { backgroundColor: tc.floatingCalloutBg, top: calloutTop }]}>
-            <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
-              {selectedResource.title}
-            </Text>
-            <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={1}>
-              {selectedResource.location}
-            </Text>
+
+            {/* 🔹 Clickable content → goes to DirectoryDetail */}
             <TouchableOpacity
-              style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg }]}
+              activeOpacity={0.85}
               onPress={() => {
-                const target = { id: selectedResource.id, lat: selectedResource.lat, lng: selectedResource.lng, title: selectedResource.title };
+                navigation.navigate('DirectoryDetail', {
+                  event: selectedResource,
+                });
+              }}
+            >
+              <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
+                {selectedResource.title}
+              </Text>
+
+              <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={1}>
+                {selectedResource.location}
+              </Text>
+            </TouchableOpacity>
+
+            {/* 🔹 Navigate button (unchanged) */}
+            <TouchableOpacity
+              style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg, marginTop: 8 }]}
+              onPress={() => {
+                const target = {
+                  id: selectedResource.id,
+                  lat: selectedResource.lat,
+                  lng: selectedResource.lng,
+                  title: selectedResource.title
+                };
+
                 if (!location) {
                   setPendingTarget(target);
                   setManualStartInput('');
@@ -869,30 +889,52 @@ export default function Map({ route }: any) {
               }}
             >
               <Icon name="navigation-2-outline" style={staticStyles.calloutIcon} fill={tc.navIconFill} />
-              <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>Navigate</Text>
+              <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>
+                Navigate
+              </Text>
             </TouchableOpacity>
+
           </View>
         )}
 
         {/* Floating callout — event */}
         {selectedEvent && (
           <View style={[staticStyles.floatingCallout, { backgroundColor: tc.floatingCalloutBg, top: calloutTop }]}>
-            <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
-              {selectedEvent.title}
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 }}>
-              <Icon name="calendar-outline" style={staticStyles.calloutIcon} fill={tc.calloutDateColor} />
-              <Text style={{ color: tc.calloutDateColor, fontSize: 12 }}>
-                {selectedEvent.date}
-              </Text>
-            </View>
-            <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={2}>
-              {selectedEvent.location}
-            </Text>
+
             <TouchableOpacity
-              style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg }]}
+              activeOpacity={0.85}
               onPress={() => {
-                const target = { id: selectedEvent.id, lat: selectedEvent.lat, lng: selectedEvent.lng, title: selectedEvent.title };
+                navigation.navigate('EventDetail', {
+                  event: selectedEvent,
+                });
+              }}
+            >
+              <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
+                {selectedEvent.title}
+              </Text>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 }}>
+                <Icon name="calendar-outline" style={staticStyles.calloutIcon} fill={tc.calloutDateColor} />
+                <Text style={{ color: tc.calloutDateColor, fontSize: 12 }}>
+                  {selectedEvent.date}
+                </Text>
+              </View>
+
+              <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={2}>
+                {selectedEvent.location}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg, marginTop: 8 }]}
+              onPress={() => {
+                const target = {
+                  id: selectedEvent.id,
+                  lat: selectedEvent.lat,
+                  lng: selectedEvent.lng,
+                  title: selectedEvent.title
+                };
+
                 if (!location) {
                   setPendingTarget(target);
                   setManualStartInput('');
@@ -904,8 +946,11 @@ export default function Map({ route }: any) {
               }}
             >
               <Icon name="navigation-2-outline" style={staticStyles.calloutIcon} fill={tc.navIconFill} />
-              <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>Navigate</Text>
+              <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>
+                Navigate
+              </Text>
             </TouchableOpacity>
+
           </View>
         )}
 

@@ -18,7 +18,7 @@ import { Auth0Provider, useAuth0 } from 'react-native-auth0';
 
 // Context Providers
 import { SideMenuProvider } from './src/navigation/SideMenuContext.tsx';
-import { RecentlyViewedProvider } from './src/context/RecentlyViewedContext';
+import { RecentlySearchedProvider  } from './src/context/RecentlySearchedContext';
 
 // Screens
 import DirectoryScreen from './src/screens/DirectoryScreen.tsx';
@@ -38,6 +38,8 @@ import EventDetailScreen   from './src/screens/EventDetailScreen';
 import SideMenu from './src/navigation/SideMenu.tsx';
 import Map from './src/screens/Map.tsx';
 import Home from './src/screens/Home.tsx';
+
+import { EnrolledClassesProvider } from './src/context/EnrolledClassesContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -104,11 +106,13 @@ export default function App() {
                   <IconRegistry icons={EvaIconsPack} />
                   
                   {/* New RecentlyViewedProvider added here */}
-                  <RecentlyViewedProvider>
+                  <RecentlySearchedProvider>
+                   <EnrolledClassesProvider>
                     <SideMenuProvider>
                       <RootNavigator />
                     </SideMenuProvider>
-                  </RecentlyViewedProvider>
+                   </EnrolledClassesProvider>
+                  </RecentlySearchedProvider>
 
                 </SafeAreaProvider>
               </ApplicationProvider>
