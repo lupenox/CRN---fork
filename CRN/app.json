@@ -14,10 +14,20 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "edu.uwm.app"
+      "bundleIdentifier": "edu.uwm.app",
+      "config":{
+        "googleMaps": {
+          "apiKey": "AIzaSyC9n8sXo2l7m1Zt3a5v6b7c8d9e0f1g2h"
+        }
+      }
     },
     "android": {
       "package": "edu.uwm.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyC9n8sXo2l7m1Zt3a5v6b7c8d9e0f1g2h"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -32,8 +42,7 @@
       [
       "react-native-auth0",
       {
-        "domain": "dev-85gf7oggpaitwy0i.us.auth0.com",
-        "customScheme": "crnapp"
+        "domain": "dev-85gf7oggpaitwy0i.us.auth0.com"
       }
       ]
     ]
