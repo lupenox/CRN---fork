@@ -17,7 +17,7 @@
       "bundleIdentifier": "edu.uwm.app",
       "config":{
         "googleMaps": {
-          "apiKey": "AIzaSyC9n8sXo2l7m1Zt3a5v6b7c8d9e0f1g2h"
+          "apiKey": "AIzaSyAm_mrIr3my6R_QJpdFOiiVGiO_G_86Svc"
         }
       }
     },
@@ -25,7 +25,7 @@
       "package": "edu.uwm.app",
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyC9n8sXo2l7m1Zt3a5v6b7c8d9e0f1g2h"
+          "apiKey": "AIzaSyAm_mrIr3my6R_QJpdFOiiVGiO_G_86Svc"
         }
       },
       "adaptiveIcon": {

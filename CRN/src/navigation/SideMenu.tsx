@@ -72,7 +72,6 @@ export default function SideMenu() {
     if (route === 'Login') {
       try {
         await clearSession();
-        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
       } catch (e) {
         console.error("Failed to log out:", e);
       }
