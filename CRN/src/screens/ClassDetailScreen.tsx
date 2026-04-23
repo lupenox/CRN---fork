@@ -39,7 +39,6 @@ function deriveScheduleType(section: string): string {
   return num >= 600 ? 'LAB' : 'LEC';
 }
 
-// Handles formats like "MWF 10:00-10:50a", "R 4:30-6:20p", "TR 2:00-3:15p"
 function parseMeetingTimes(meets: string): { day: string; start_time: string; end_time: string }[] {
   if (!meets || meets.trim() === '' || meets === 'No Meeting Pattern') return [];
 
@@ -48,22 +47,17 @@ function parseMeetingTimes(meets: string): { day: string; start_time: string; en
 
   const [, dayStr, rawStart, rawEnd, ampm] = match;
 
-  // Normalize times — end time has the am/pm marker, infer start from end
   const suffix = ampm.toLowerCase() === 'p' ? 'pm' : 'am';
 
   function normalizeTime(t: string, forceSuffix: string): string {
     const [h, m] = t.split(':');
     const hour = parseInt(h, 10);
-    // If no minutes part, treat as :00
     const mins = m ?? '00';
-    // Infer am/pm: if end is pm and start hour > end hour, start is probably also pm
     return `${hour}:${mins} ${forceSuffix}`;
   }
 
-  // Parse end hour to help infer start period
   const endHour = parseInt(rawEnd.split(':')[0], 10);
   const startHour = parseInt(rawStart.split(':')[0], 10);
-  // If end is pm and start hour <= end hour it's the same period; if start > end (e.g. 11-1p) start is am
   const startSuffix = suffix === 'pm' && startHour > endHour ? 'am' : suffix;
 
   const start_time = normalizeTime(rawStart, startSuffix);
