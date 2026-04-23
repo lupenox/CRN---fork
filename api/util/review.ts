@@ -1,4 +1,4 @@
-import { sql } from "../db.ts";
+import { sql, REVIEWS_TABLE } from "../db.ts";
 
 export type Review = {
     event_id: number;
@@ -6,20 +6,6 @@ export type Review = {
     rating: number;
     comment: string;
 };
-
-const REVIEWS_TABLE = 'reviews';
-
-await sql`
-    CREATE TABLE IF NOT EXISTS ${sql(REVIEWS_TABLE)} (
-        id SERIAL PRIMARY KEY,
-        event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
-        user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
-        rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-        comment TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(event_id, user_id) -- Ensure one review per user per event
-    );
-`;
 
 export const getReviewsForEvent = async (eventId: number) => {
     return await sql`

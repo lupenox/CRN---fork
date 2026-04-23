@@ -1,4 +1,4 @@
-import { sql } from "../db.ts";
+import { sql, EVENTS_TABLE_NAME } from "../db.ts";
 
 export type CrnEvent = {
     Title : string,
@@ -7,19 +7,6 @@ export type CrnEvent = {
     Description : string,
     Organizer : string | null
 }
-
-const EVENTS_TABLE_NAME = 'events';
-
-await sql`
-    CREATE TABLE IF NOT EXISTS ${sql(EVENTS_TABLE_NAME)} (
-        id SERIAL PRIMARY KEY,
-        title TEXT NOT NULL,
-        date VARCHAR(100) NOT NULL,
-        location TEXT,
-        description TEXT,
-        organizer VARCHAR(255)
-    );
-`;
 
 export const getEvents = async (id?: string | null ) => {
     if (id) {
