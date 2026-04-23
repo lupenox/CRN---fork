@@ -8,7 +8,7 @@ import { darkMapStyle } from '../theme/mapStyles';
 import * as Location from 'expo-location';
 import { useAppTheme } from '../theme/ThemeContext';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAm_mrIr3my6R_QJpdFOiiVGiO_G_86Svc';
+const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 // Types
 type MapView_t = 'resources' | 'events';

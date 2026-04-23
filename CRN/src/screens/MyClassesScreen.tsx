@@ -123,6 +123,18 @@ export default function MyClassesScreen() {
               onPress={(section) => navigation.navigate('ClassDetail', { course: section })}
             />
           )}
+
+          ListFooterComponent={() => (
+            <Button
+              accessoryLeft={PlusIcon}
+              appearance="ghost"
+              status="primary"
+              style={styles.footerButton}
+              onPress={() => navigation.navigate('ClassSearch')}
+            >
+              Browse More Classes
+            </Button>
+          )}
         />
       )}
     </Layout>
@@ -153,4 +165,8 @@ const styles = StyleSheet.create({
   titleRow:  { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
   badge:     { borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
   badgeText: { fontSize: 10, fontWeight: '700' },
+  footerButton: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
 });

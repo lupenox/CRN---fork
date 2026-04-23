@@ -12,7 +12,7 @@ const HashIcon   = (props) => <Icon {...props} name="hash-outline" />;
 const PinIcon    = (props) => <Icon {...props} name="pin-outline" />;
 const NavIcon    = (props) => <Icon {...props} name="navigation-2-outline" />;
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAm_mrIr3my6R_QJpdFOiiVGiO_G_86Svc';
+const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 const DAY_MAP: Record<string, string> = {
   M: 'Monday',
