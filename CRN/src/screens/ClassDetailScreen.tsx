@@ -12,12 +12,64 @@ const HashIcon   = (props) => <Icon {...props} name="hash-outline" />;
 const PinIcon    = (props) => <Icon {...props} name="pin-outline" />;
 const NavIcon    = (props) => <Icon {...props} name="navigation-2-outline" />;
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAm_mrIr3my6R_QJpdFOiiVGiO_G_86Svc';
+const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-const SCHD_LABEL = {
-  LEC: 'Lecture', LAB: 'Laboratory', SEM: 'Seminar',
-  IND: 'Independent Study', DIS: 'Discussion', FLD: 'Field Studies',
+const DAY_MAP: Record<string, string> = {
+  M: 'Monday',
+  T: 'Tuesday',
+  W: 'Wednesday',
+  R: 'Thursday',
+  F: 'Friday',
+  S: 'Saturday',
+  U: 'Sunday',
 };
+
+const SCHD_LABEL: Record<string, string> = {
+  LEC: 'Lecture',
+  LAB: 'Laboratory',
+  SEM: 'Seminar',
+  IND: 'Independent Study',
+  DIS: 'Discussion',
+  FLD: 'Field Studies',
+};
+
+function deriveScheduleType(section: string): string {
+  const num = parseInt(section, 10);
+  if (isNaN(num)) return 'LEC';
+  return num >= 600 ? 'LAB' : 'LEC';
+}
+
+function parseMeetingTimes(meets: string): { day: string; start_time: string; end_time: string }[] {
+  if (!meets || meets.trim() === '' || meets === 'No Meeting Pattern') return [];
+
+  const match = meets.trim().match(/^([A-Za-z]+)\s+([\d:]+)-([\d:]+)([aApP]?)$/);
+  if (!match) return [];
+
+  const [, dayStr, rawStart, rawEnd, ampm] = match;
+
+  const suffix = ampm.toLowerCase() === 'p' ? 'pm' : 'am';
+
+  function normalizeTime(t: string, forceSuffix: string): string {
+    const [h, m] = t.split(':');
+    const hour = parseInt(h, 10);
+    const mins = m ?? '00';
+    return `${hour}:${mins} ${forceSuffix}`;
+  }
+
+  const endHour = parseInt(rawEnd.split(':')[0], 10);
+  const startHour = parseInt(rawStart.split(':')[0], 10);
+  const startSuffix = suffix === 'pm' && startHour > endHour ? 'am' : suffix;
+
+  const start_time = normalizeTime(rawStart, startSuffix);
+  const end_time   = normalizeTime(rawEnd, suffix);
+
+  const result: { day: string; start_time: string; end_time: string }[] = [];
+  for (const letter of dayStr.toUpperCase()) {
+    const day = DAY_MAP[letter];
+    if (day) result.push({ day, start_time, end_time });
+  }
+  return result;
+}
 
 function getBadgeColors(schedType: string, theme: Record<string, string>) {
   switch (schedType) {
@@ -29,7 +81,6 @@ function getBadgeColors(schedType: string, theme: Record<string, string>) {
   }
 }
 
-// Geocode a room/building string scoped to UWM's campus
 async function geocodeRoom(roomString: string): Promise<{ lat: number; lng: number } | null> {
   const query = `${roomString}, University of Wisconsin-Milwaukee`;
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${GOOGLE_MAPS_API_KEY}`;
@@ -77,32 +128,32 @@ export default function ClassDetailScreen() {
   const theme      = useTheme();
   const hintColor  = theme['text-hint-color'];
 
-  const { course } = route.params as { course: any };
+  const raw = (route.params as { course: any }).course;
+  const course = {
+    ...raw,
+    schedule_type: deriveScheduleType(raw.section),
+    meeting_times: parseMeetingTimes(raw.meets),
+  };
+
   const { addClass, removeClass, isEnrolled } = useEnrolledClasses();
-  const enrolled = isEnrolled(course.crn);
+  const enrolled      = isEnrolled(course.crn);
   const scheduleLabel = SCHD_LABEL[course.schedule_type] ?? course.schedule_type;
   const { bg, text }  = getBadgeColors(course.schedule_type, theme);
 
-const locationString = (course.room || course.campus)?.toLowerCase().includes('online')
-  ? null
-  : course.room || course.campus;
+  const locationString = (course.room || course.campus)?.toLowerCase().includes('online')
+    ? null
+    : course.room || course.campus;
 
   const [geocodedLocation, setGeocodedLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [geocodeLoading, setGeocodeLoading] = useState(false);
-  const [geocodeFailed, setGeocodeFailed] = useState(false);
+  const [geocodeLoading, setGeocodeLoading]     = useState(false);
+  const [geocodeFailed, setGeocodeFailed]       = useState(false);
 
   useEffect(() => {
     if (!locationString) return;
     setGeocodeLoading(true);
     setGeocodeFailed(false);
     geocodeRoom(locationString)
-      .then((coords) => {
-        if (coords) {
-          setGeocodedLocation(coords);
-        } else {
-          setGeocodeFailed(true);
-        }
-      })
+      .then((coords) => coords ? setGeocodedLocation(coords) : setGeocodeFailed(true))
       .catch(() => setGeocodeFailed(true))
       .finally(() => setGeocodeLoading(false));
   }, [locationString]);
@@ -129,27 +180,22 @@ const locationString = (course.room || course.campus)?.toLowerCase().includes('o
         <Card style={styles.card}>
           <Text category="s1" style={styles.sectionLabel}>Course Info</Text>
           <Divider style={styles.divider} />
-          <InfoRow IconComp={HashIcon}   label="CRN"        value={course.crn}        hintColor={hintColor} />
-          <InfoRow IconComp={PersonIcon} label="Instructor" value={course.instructor}  hintColor={hintColor} />
-          <InfoRow IconComp={PinIcon}    label="Room"       value={course.room}        hintColor={hintColor} />
-          <InfoRow IconComp={PinIcon}    label="Location"     value={course.room ? undefined : course.campus} hintColor={hintColor} />
+          <InfoRow IconComp={HashIcon}   label="CRN"        value={course.crn}       hintColor={hintColor} />
+          <InfoRow IconComp={PersonIcon} label="Instructor" value={course.instructor} hintColor={hintColor} />
+          <InfoRow IconComp={PinIcon}    label="Room"       value={course.room}       hintColor={hintColor} />
+          <InfoRow IconComp={PinIcon}    label="Campus"     value={course.room ? undefined : course.campus} hintColor={hintColor} />
 
-          {/* Navigate button — shown when a location string exists */}
           {locationString && (
             <View style={styles.navigateRow}>
               {geocodeLoading ? (
                 <View style={styles.geocodeStatus}>
                   <ActivityIndicator size="small" color={theme['color-primary-500']} />
-                  <Text category="c1" appearance="hint" style={styles.geocodeStatusText}>
-                    Finding location…
-                  </Text>
+                  <Text category="c1" appearance="hint" style={styles.geocodeStatusText}>Finding location…</Text>
                 </View>
               ) : geocodeFailed ? (
                 <View style={styles.geocodeStatus}>
-                  <Icon name="alert-circle-outline" style={styles.geocodeStatusIcon} fill={theme['text-hint-color']} />
-                  <Text category="c1" appearance="hint" style={styles.geocodeStatusText}>
-                    Location not found
-                  </Text>
+                  <Icon name="alert-circle-outline" style={styles.geocodeStatusIcon} fill={hintColor} />
+                  <Text category="c1" appearance="hint" style={styles.geocodeStatusText}>Location not found</Text>
                 </View>
               ) : geocodedLocation ? (
                 <Button

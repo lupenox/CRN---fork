@@ -29,9 +29,11 @@ export default function DirectoryDetailScreen({ route, navigation })
                 <Text category="c1" style={{ marginBottom: 6 }}>Hours: {event.hours}</Text>
                 <Text style={{ marginBottom: 8 }}>{event.description}</Text>
 
-                <Button onPress={() => Linking.openURL(event.website)} style={{ marginTop: 12 }}>
+                {event.website ? (
+                  <Button onPress={() => Linking.openURL(event.website)} style={{ marginTop: 12 }}>
                     Open Website
-                </Button>
+                  </Button>
+                ) : null}
                 {event.lat && event.lng && (
                     <Button
                         style={{ marginTop: 12 }}
