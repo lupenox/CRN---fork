@@ -2,6 +2,7 @@ import { Modal, TextInput, Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useRef, useEffect } from 'react';
 import React from 'react';
+import { useAuth0 } from 'react-native-auth0';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
@@ -36,6 +37,7 @@ function formatDateLong(dateStr: string): string {
 
 export default function EventDetailScreen({ route, navigation }: any) {
   const theme = useTheme();
+  const { user } = useAuth0();
   const { event }: { event: Event } = route.params ?? {};
   const [reviewVisible, setReviewVisible] = useState(false);
   const [rating, setRating] = useState(0);
@@ -76,11 +78,28 @@ export default function EventDetailScreen({ route, navigation }: any) {
     ]).start();
   };
 
-  const handleSubmitReview = () => {
-    console.log({ rating, message });
+const handleSubmitReview = async () => {
+  try {
+    const response = await fetch('https://crn.crn.deno.net/dynamic?table=review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_id: event.id,
+        user_id: user?.sub ?? null,
+        rating,
+        comment: message,
+      }),
+    });
+
+    const result = await response.json();
+    console.log('Review POST response:', result);
+
+    if (!response.ok) {
+      console.log('Review POST failed:', response.status, result);
+      return;
+    }
 
     reviewedEventIds.add(event.id);
-
     setSubmitted(true);
     setHasReviewed(true);
 
@@ -90,7 +109,10 @@ export default function EventDetailScreen({ route, navigation }: any) {
       setRating(0);
       setMessage('');
     }, 1200);
-  };
+  } catch (err) {
+    console.log('Error submitting review:', err);
+  }
+};
 
   if (!event) {
     return (
