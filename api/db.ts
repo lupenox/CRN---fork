@@ -12,7 +12,7 @@ export const sql = postgres(
 
 await sql`
     DO $$ BEGIN
-        CREATE TYPE user_role AS ENUM ('guest', 'member', 'admin);
+        CREATE TYPE user_role AS ENUM ('guest', 'member', 'admin');
     EXCEPTION
         WHEN duplicate_object THEN NULL;
     END $$;
