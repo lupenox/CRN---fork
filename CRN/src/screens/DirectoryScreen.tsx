@@ -1,50 +1,80 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Layout, Text, Input, Icon, OverflowMenu, MenuItem } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
-import { mockResources } from '../data/mockData';
 import { ScrollView } from 'react-native';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { useRecentlySearched } from '../context/RecentlySearchedContext';
 
+type Resource = {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  location: string;
+  address: string;
+  organizer: string;
+  phone: string;
+  website: string;
+  hours: string;
+  lat?: number;
+  lng?: number;
+};
+
 export default function DirectoryScreen({ navigation, route }: any) {
   const [searchQuery, setSearchQuery] = useState(route?.params?.initialQuery ?? '');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [menuVisible, setMenuVisible] = useState(false);
+  const [allResources, setAllResources] = useState<Resource[]>([]);
+  const { addRecentSearch } = useRecentlySearched();
 
-  // Get unique categories
-  const categories = useMemo(() => {
-    const unique = Array.from(new Set(mockResources.map(r => r.category)));
-    return ['All Categories', ...unique];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://crn.crn.deno.net/dynamic?table=resource');
+        const json = await response.json();
+        const resources: Resource[] = (json.data ?? []).map((r: any, i: number) => ({
+          ...r,
+          id: r.id ?? `resource-${i}`,
+        }));
+        setAllResources(resources);
+      } catch (error) {
+        console.log('Error fetching resources:', error);
+      }
+    };
+    fetchData();
   }, []);
 
-  // Combined filtering and search logic
-  const filteredData = mockResources.filter(item => {
+  const categories = useMemo(() => {
+    const unique = Array.from(new Set(allResources.map(r => r.category).filter(Boolean)));
+    return ['All Categories', ...unique];
+  }, [allResources]);
+
+  const filteredData = useMemo(() => {
     const query = searchQuery.toLowerCase();
-    const matchesSearch = item.title.toLowerCase().includes(query) ||
-      item.description.toLowerCase().includes(query) ||
-      item.location.toLowerCase().includes(query);
-    const matchesCategory = selectedCategory === 'All Categories' || item.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+    return allResources.filter(item => {
+      const matchesSearch =
+        item.title?.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query) ||
+        item.location?.toLowerCase().includes(query);
+      const matchesCategory =
+        selectedCategory === 'All Categories' || item.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [allResources, searchQuery, selectedCategory]);
 
-  // Icons
-  const SearchIcon = (props) => <Icon {...props} name='search-outline' />;
-  const FilterIcon = (props) => <Icon {...props} name='funnel-outline' />;
-
-  const toggleMenu = () => setMenuVisible(!menuVisible);
+  const SearchIcon = (props: any) => <Icon {...props} name="search-outline" />;
+  const FilterIcon = (props: any) => <Icon {...props} name="funnel-outline" />;
 
   const renderFilterButton = () => (
     <Button
       accessoryLeft={FilterIcon}
       appearance="ghost"
       status={selectedCategory === 'All Categories' ? 'basic' : 'primary'}
-      onPress={toggleMenu}
+      onPress={() => setMenuVisible(!menuVisible)}
     />
   );
-
-  const { addRecentSearch } = useRecentlySearched();
 
   return (
     <Layout level="2" style={{ flex: 1 }}>
@@ -60,13 +90,12 @@ export default function DirectoryScreen({ navigation, route }: any) {
           }}
           style={styles.input}
         />
-
         <OverflowMenu
           anchor={renderFilterButton}
           visible={menuVisible}
-          onBackdropPress={toggleMenu}
+          onBackdropPress={() => setMenuVisible(false)}
         >
-          {categories.map((cat) => (
+          {categories.map(cat => (
             <MenuItem
               key={cat}
               title={cat}
@@ -79,23 +108,24 @@ export default function DirectoryScreen({ navigation, route }: any) {
         </OverflowMenu>
       </Layout>
 
-      {/* Show active filter tag if one is selected */}
       {selectedCategory !== 'All Categories' && (
         <Layout level="1" style={styles.activeFilterBar}>
           <Text category="c1">Filtering by: **{selectedCategory}**</Text>
-          <Button size="tiny" appearance="ghost" onPress={() => setSelectedCategory('All Categories')}>Clear</Button>
+          <Button size="tiny" appearance="ghost" onPress={() => setSelectedCategory('All Categories')}>
+            Clear
+          </Button>
         </Layout>
       )}
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {filteredData.map(event => (
+        {filteredData.map(resource => (
           <Card
-            key={event.id}
+            key={resource.id}
             style={styles.card}
-            onPress={() => navigation.navigate('DirectoryDetail', { event })}
+            onPress={() => navigation.navigate('DirectoryDetail', { event: resource })}
           >
-            <Text category="s1">{event.title}</Text>
-            <Text appearance="hint">{event.location}</Text>
+            <Text category="s1">{resource.title}</Text>
+            <Text appearance="hint">{resource.location}</Text>
           </Card>
         ))}
       </ScrollView>
@@ -110,9 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  input: {
-    flex: 1,
-  },
+  input: { flex: 1 },
   activeFilterBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -120,11 +148,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
-  scrollContent: {
-    padding: 16,
-    gap: 12,
-  },
-  card: {
-    width: '100%',
-  },
+  scrollContent: { padding: 16, gap: 12 },
+  card: { width: '100%' },
 });
