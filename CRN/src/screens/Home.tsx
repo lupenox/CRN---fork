@@ -204,9 +204,9 @@ export default function Home({ navigation }: any) {
                   <View style={styles.listMeta}>
                     <Icon name="clock-outline" style={styles.listMetaIcon} fill={tc.hint} />
                     <Text style={[styles.listMetaText, { color: tc.hint }]} numberOfLines={1}>
-                      {section.meets ?? section.meeting_times?.[0]
+                      {section.meets ?? (section.meeting_times && section.meeting_times?.[0] && section.meeting_times[0].day
                         ? `${section.meeting_times[0].day} ${section.meeting_times[0].start_time}–${section.meeting_times[0].end_time}`
-                        : 'No meeting pattern'}
+                        : 'No meeting pattern')}
                     </Text>
                   </View>
                 </View>

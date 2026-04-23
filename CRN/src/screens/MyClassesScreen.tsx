@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
+import { Layout, Text, Icon, useTheme } from '@ui-kitten/components';
 import { useNavigation } from '@react-navigation/native';
 import { AppHeader } from '../navigation/AppHeader';
 import Button from '../components/Button';
@@ -41,6 +41,7 @@ function ClassRow({ section, onPress, theme }) {
       default:    return { bg: theme['color-primary-100'], text: theme['color-primary-700'] };
     }
   }
+
   return (
     <TouchableOpacity
       style={[styles.row, { borderColor: tc.border }]}
@@ -49,7 +50,6 @@ function ClassRow({ section, onPress, theme }) {
     >
       <View style={[styles.accent, { backgroundColor: tc.warning }]} />
       <View style={styles.rowBody}>
-        {/* Badge + course code on the same line */}
         <View style={styles.titleRow}>
           <View style={[styles.badge, { backgroundColor: getBadgeColors(section.schedule_type, theme).bg }]}>
             <Text style={[styles.badgeText, { color: getBadgeColors(section.schedule_type, theme).text }]}>
@@ -91,11 +91,13 @@ export default function MyClassesScreen() {
         title="My Classes"
         accessoryRight={() => (
           <Button
-            appearance="ghost"
+            size="small"
             status="primary"
             accessoryLeft={PlusIcon}
             onPress={() => navigation.navigate('ClassSearch')}
-          />
+          >
+            Add Class
+          </Button>
         )}
       />
 
@@ -142,10 +144,11 @@ export default function MyClassesScreen() {
 }
 
 const styles = StyleSheet.create({
-  root:       { flex: 1 },
-  list:       { padding: 16 },
-  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyIcon:  { width: 56, height: 56, marginBottom: 12 },
+  root:         { flex: 1 },
+  list:         { padding: 16 },
+  emptyState:   { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  emptyIcon:    { width: 56, height: 56, marginBottom: 12 },
+  footerButton: { marginTop: 16, marginBottom: 8 },
 
   row: {
     flexDirection: 'row',
