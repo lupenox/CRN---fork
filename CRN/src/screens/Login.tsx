@@ -14,7 +14,8 @@ export default function Login() {
         additionalParameters: {
           prompt: 'select_account',
         },
-      });
+      },
+    );
     } catch (e) {
       console.error('Login error:', e);
     }
