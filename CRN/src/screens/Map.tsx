@@ -3,8 +3,6 @@ import { Layout, Icon, useTheme } from '@ui-kitten/components';
 import { StyleSheet, View, Animated, ScrollView, TouchableOpacity, Text, Modal, TextInput, Alert } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { AppHeader } from '../navigation/AppHeader';
-import { mockResources } from '../data/mockData';
-import eventsData from '../../scripts/events_geocoded.json';
 import Button from '../components/Button';
 import { darkMapStyle } from '../theme/mapStyles';
 import * as Location from 'expo-location';
@@ -22,6 +20,21 @@ type EventWithCoords = {
   location: string;
   organizer: string;
   date: string;
+  lat: number;
+  lng: number;
+};
+
+type Resource = {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  location: string;
+  address: string;
+  organizer: string;
+  phone: string;
+  website: string;
+  hours: string;
   lat: number;
   lng: number;
 };
@@ -82,6 +95,17 @@ function decodePolyline(encoded: string): { latitude: number; longitude: number 
 function parseEventDate(dateStr: string): Date {
   const [m, d, y] = dateStr.split('/').map(Number);
   return new Date(y, m - 1, d);
+}
+
+function isValidEventDate(dateStr: string): boolean {
+  if (!dateStr || typeof dateStr !== 'string') return false;
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return false;
+  const [m, d, y] = parts.map(Number);
+  if (isNaN(m) || isNaN(d) || isNaN(y)) return false;
+  if (m < 1 || m > 12 || d < 1 || d > 31 || y < 2000) return false;
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
 }
 
 function localMidnight(date: Date): Date {
@@ -394,7 +418,7 @@ export default function Map({ route, navigation }: any) {
   const { resolvedTheme } = useAppTheme();
   const isDarkMode = resolvedTheme === 'dark';
   const theme = useTheme();
-
+  const [allResources, setAllResources] = useState<Resource[]>([]);
   const mapRef = useRef<MapView>(null);
   const markerRefs = useRef<{ [key: string]: any }>({});
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
@@ -434,9 +458,9 @@ export default function Map({ route, navigation }: any) {
   }, [geocodedEvents, dateFilter]);
 
   const availableCategories = useMemo(() => {
-    const cats = mockResources.map(r => r.category).filter(Boolean);
+    const cats = allResources.map(r => r.category).filter(Boolean);
     return Array.from(new Set(cats)).sort();
-  }, []);
+  }, [allResources]);
 
   // Theme colors
   const tc = {
@@ -485,7 +509,7 @@ export default function Map({ route, navigation }: any) {
     .filter(e => e.lat && e.lng)
     .filter(e => !organizerFilter || e.organizer === organizerFilter);
 
-  const visibleResources = mockResources.filter(r =>
+  const visibleResources = allResources.filter(r =>
     !categoryFilter || r.category === categoryFilter
   );
 
@@ -510,9 +534,45 @@ export default function Map({ route, navigation }: any) {
   }, [dateFilter]);
 
   useEffect(() => {
-    if (geocodedEvents.length > 0) return;
-    const withIds = (eventsData as any[]).map((e, i) => ({ ...e, id: `event-${i}` }));
-    setGeocodedEvents(withIds);
+    const fetchResources = async () => {
+      try {
+        const response = await fetch('https://crn.crn.deno.net/dynamic?table=resource');
+        const json = await response.json();
+        const resources: Resource[] = (json.data ?? [])
+          .filter((r: any) => r.lat != null && r.lng != null)
+          .map((r: any, i: number) => ({
+            ...r,
+            id: r.id ?? `resource-${i}`,
+            lat: parseFloat(r.lat),
+            lng: parseFloat(r.lng),
+          }));
+        setAllResources(resources);
+      } catch (error) {
+        console.log('Error fetching resources:', error);
+      }
+    };
+    fetchResources();
+  }, []);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('https://crn.crn.deno.net/dynamic?table=event');
+        const json = await response.json();
+        const events: EventWithCoords[] = (json.data ?? [])
+          .filter((e: any) => e.latitude != null && e.longitude != null && isValidEventDate(e.date))
+          .map((e: any, i: number) => ({
+            ...e,
+            id: e.id ?? `event-${i}`,
+            lat: parseFloat(e.latitude),
+            lng: parseFloat(e.longitude),
+          }));
+        setGeocodedEvents(events);
+      } catch (error) {
+        console.log('Error fetching events:', error);
+      }
+    };
+    fetchEvents();
   }, []);
 
   useEffect(() => {
