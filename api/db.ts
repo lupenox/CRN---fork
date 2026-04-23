@@ -79,24 +79,10 @@ await sql`
     );
 `;
 
-export const REVIEWS_TABLE = 'review';
+export const RESOURCES_TABLE_NAME = 'resource';
 
 await sql`
-    CREATE TABLE IF NOT EXISTS ${sql(REVIEWS_TABLE)} (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES ${sql(USERS_TABLE_NAME)}(id) ON DELETE CASCADE,
-        event_id INTEGER REFERENCES ${sql(EVENTS_TABLE_NAME)}(id) ON DELETE CASCADE,
-        rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-        comment TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(event_id, user_id) -- Ensure one review per user per event
-    );
-`;
-
-export const RESOURCES_TABLE = 'resource';
-
-await sql`
-    CREATE TABLE IF NOT EXISTS ${sql(RESOURCES_TABLE)} (
+    CREATE TABLE IF NOT EXISTS ${sql(RESOURCES_TABLE_NAME)} (
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         category resource_category,
@@ -111,11 +97,27 @@ await sql`
     );
 `;
 
+export const REVIEWS_TABLE = 'review';
+
+await sql`
+    CREATE TABLE IF NOT EXISTS ${sql(REVIEWS_TABLE)} (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES ${sql(USERS_TABLE_NAME)}(id) ON DELETE CASCADE,
+        event_id INTEGER REFERENCES ${sql(EVENTS_TABLE_NAME)}(id) ON DELETE CASCADE,
+        resource_id INTEGER REFERENCES ${sql(RESOURCES_TABLE_NAME)}(id) ON DELETE CASCADE,
+        rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(event_id, user_id) -- Ensure one review per user per event
+    );
+`;
+
 export const COURSES_TABLE_NAME = 'course';
 
 await sql`
     CREATE TABLE IF NOT EXISTS ${sql(COURSES_TABLE_NAME)} (
         id SERIAL PRIMARY KEY,
+        course_code TEXT,
         title TEXT NOT NULL,
         crn TEXT,
         section TEXT,
