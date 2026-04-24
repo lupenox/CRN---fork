@@ -1,15 +1,5 @@
-import { sql } from "../db.ts";
-import { EVENTS_TABLE_NAME, hasEvent } from "./events.ts";
-
-const EVENT_STATS_TABLE_NAME = 'event_stats';
-
-await sql`
-    CREATE TABLE IF NOT EXISTS ${sql(EVENT_STATS_TABLE_NAME)} (
-        id SERIAL PRIMARY KEY,
-        eventId INT REFERENCES ${sql(EVENTS_TABLE_NAME)}(id),
-        accessRequests INT 
-    );
-`;
+import { sql, EVENTS_TABLE_NAME, EVENT_STATS_TABLE_NAME } from "../db.ts";
+import { hasEvent } from "./events.ts";
 
 export async function logAppStat(table : string, id : number) {
     switch(table.toLowerCase()) {

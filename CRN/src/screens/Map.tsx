@@ -3,14 +3,12 @@ import { Layout, Icon, useTheme } from '@ui-kitten/components';
 import { StyleSheet, View, Animated, ScrollView, TouchableOpacity, Text, Modal, TextInput, Alert } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { AppHeader } from '../navigation/AppHeader';
-import { mockResources } from '../data/mockData';
-import eventsData from '../../scripts/events_geocoded.json';
 import Button from '../components/Button';
 import { darkMapStyle } from '../theme/mapStyles';
 import * as Location from 'expo-location';
 import { useAppTheme } from '../theme/ThemeContext';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAm_mrIr3my6R_QJpdFOiiVGiO_G_86Svc';
+const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 // Types
 type MapView_t = 'resources' | 'events';
@@ -22,6 +20,21 @@ type EventWithCoords = {
   location: string;
   organizer: string;
   date: string;
+  lat: number;
+  lng: number;
+};
+
+type Resource = {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  location: string;
+  address: string;
+  organizer: string;
+  phone: string;
+  website: string;
+  hours: string;
   lat: number;
   lng: number;
 };
@@ -82,6 +95,17 @@ function decodePolyline(encoded: string): { latitude: number; longitude: number 
 function parseEventDate(dateStr: string): Date {
   const [m, d, y] = dateStr.split('/').map(Number);
   return new Date(y, m - 1, d);
+}
+
+function isValidEventDate(dateStr: string): boolean {
+  if (!dateStr || typeof dateStr !== 'string') return false;
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return false;
+  const [m, d, y] = parts.map(Number);
+  if (isNaN(m) || isNaN(d) || isNaN(y)) return false;
+  if (m < 1 || m > 12 || d < 1 || d > 31 || y < 2000) return false;
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
 }
 
 function localMidnight(date: Date): Date {
@@ -390,11 +414,11 @@ const staticStyles = StyleSheet.create({
   modalButtons: { flexDirection: 'row', gap: 8 },
 });
 
-export default function Map({ route }: any) {
+export default function Map({ route, navigation }: any) {
   const { resolvedTheme } = useAppTheme();
   const isDarkMode = resolvedTheme === 'dark';
   const theme = useTheme();
-
+  const [allResources, setAllResources] = useState<Resource[]>([]);
   const mapRef = useRef<MapView>(null);
   const markerRefs = useRef<{ [key: string]: any }>({});
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
@@ -434,9 +458,9 @@ export default function Map({ route }: any) {
   }, [geocodedEvents, dateFilter]);
 
   const availableCategories = useMemo(() => {
-    const cats = mockResources.map(r => r.category).filter(Boolean);
+    const cats = allResources.map(r => r.category).filter(Boolean);
     return Array.from(new Set(cats)).sort();
-  }, []);
+  }, [allResources]);
 
   // Theme colors
   const tc = {
@@ -485,7 +509,7 @@ export default function Map({ route }: any) {
     .filter(e => e.lat && e.lng)
     .filter(e => !organizerFilter || e.organizer === organizerFilter);
 
-  const visibleResources = mockResources.filter(r =>
+  const visibleResources = allResources.filter(r =>
     !categoryFilter || r.category === categoryFilter
   );
 
@@ -496,23 +520,59 @@ export default function Map({ route }: any) {
     setResourceMarkersReady(false);
     const timer = setTimeout(() => setResourceMarkersReady(true), 500);
     return () => clearTimeout(timer);
-  }, [mapViewMode]);
+  }, [mapViewMode, categoryFilter]);
 
   useEffect(() => {
     if (mapViewMode !== 'events') return;
     setEventMarkersReady(false);
     const timer = setTimeout(() => setEventMarkersReady(true), 500);
     return () => clearTimeout(timer);
-  }, [mapViewMode, geocodedEvents.length]);
+  }, [mapViewMode, geocodedEvents.length, dateFilter, organizerFilter]);
 
   useEffect(() => {
     setOrganizerFilter(null);
   }, [dateFilter]);
 
   useEffect(() => {
-    if (geocodedEvents.length > 0) return;
-    const withIds = (eventsData as any[]).map((e, i) => ({ ...e, id: `event-${i}` }));
-    setGeocodedEvents(withIds);
+    const fetchResources = async () => {
+      try {
+        const response = await fetch('https://crn.crn.deno.net/dynamic?table=resource');
+        const json = await response.json();
+        const resources: Resource[] = (json.data ?? [])
+          .filter((r: any) => r.lat != null && r.lng != null)
+          .map((r: any, i: number) => ({
+            ...r,
+            id: r.id ?? `resource-${i}`,
+            lat: parseFloat(r.lat),
+            lng: parseFloat(r.lng),
+          }));
+        setAllResources(resources);
+      } catch (error) {
+        console.log('Error fetching resources:', error);
+      }
+    };
+    fetchResources();
+  }, []);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('https://crn.crn.deno.net/dynamic?table=event');
+        const json = await response.json();
+        const events: EventWithCoords[] = (json.data ?? [])
+          .filter((e: any) => e.latitude != null && e.longitude != null && isValidEventDate(e.date))
+          .map((e: any, i: number) => ({
+            ...e,
+            id: e.id ?? `event-${i}`,
+            lat: parseFloat(e.latitude),
+            lng: parseFloat(e.longitude),
+          }));
+        setGeocodedEvents(events);
+      } catch (error) {
+        console.log('Error fetching events:', error);
+      }
+    };
+    fetchEvents();
   }, []);
 
   useEffect(() => {
@@ -848,16 +908,36 @@ export default function Map({ route }: any) {
         {/* Floating callout — resource */}
         {selectedResource && (
           <View style={[staticStyles.floatingCallout, { backgroundColor: tc.floatingCalloutBg, top: calloutTop }]}>
-            <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
-              {selectedResource.title}
-            </Text>
-            <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={1}>
-              {selectedResource.location}
-            </Text>
+
+            {/* 🔹 Clickable content → goes to DirectoryDetail */}
             <TouchableOpacity
-              style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg }]}
+              activeOpacity={0.85}
               onPress={() => {
-                const target = { id: selectedResource.id, lat: selectedResource.lat, lng: selectedResource.lng, title: selectedResource.title };
+                navigation.navigate('DirectoryDetail', {
+                  event: selectedResource,
+                });
+              }}
+            >
+              <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
+                {selectedResource.title}
+              </Text>
+
+              <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={1}>
+                {selectedResource.location}
+              </Text>
+            </TouchableOpacity>
+
+            {/* 🔹 Navigate button (unchanged) */}
+            <TouchableOpacity
+              style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg, marginTop: 8 }]}
+              onPress={() => {
+                const target = {
+                  id: selectedResource.id,
+                  lat: selectedResource.lat,
+                  lng: selectedResource.lng,
+                  title: selectedResource.title
+                };
+
                 if (!location) {
                   setPendingTarget(target);
                   setManualStartInput('');
@@ -869,30 +949,52 @@ export default function Map({ route }: any) {
               }}
             >
               <Icon name="navigation-2-outline" style={staticStyles.calloutIcon} fill={tc.navIconFill} />
-              <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>Navigate</Text>
+              <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>
+                Navigate
+              </Text>
             </TouchableOpacity>
+
           </View>
         )}
 
         {/* Floating callout — event */}
         {selectedEvent && (
           <View style={[staticStyles.floatingCallout, { backgroundColor: tc.floatingCalloutBg, top: calloutTop }]}>
-            <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
-              {selectedEvent.title}
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 }}>
-              <Icon name="calendar-outline" style={staticStyles.calloutIcon} fill={tc.calloutDateColor} />
-              <Text style={{ color: tc.calloutDateColor, fontSize: 12 }}>
-                {selectedEvent.date}
-              </Text>
-            </View>
-            <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={2}>
-              {selectedEvent.location}
-            </Text>
+
             <TouchableOpacity
-              style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg }]}
+              activeOpacity={0.85}
               onPress={() => {
-                const target = { id: selectedEvent.id, lat: selectedEvent.lat, lng: selectedEvent.lng, title: selectedEvent.title };
+                navigation.navigate('EventDetail', {
+                  event: selectedEvent,
+                });
+              }}
+            >
+              <Text style={[staticStyles.calloutTitle, { color: tc.calloutTitleColor }]} numberOfLines={2}>
+                {selectedEvent.title}
+              </Text>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 }}>
+                <Icon name="calendar-outline" style={staticStyles.calloutIcon} fill={tc.calloutDateColor} />
+                <Text style={{ color: tc.calloutDateColor, fontSize: 12 }}>
+                  {selectedEvent.date}
+                </Text>
+              </View>
+
+              <Text style={[staticStyles.calloutSubtitle, { color: tc.calloutSubtitleColor }]} numberOfLines={2}>
+                {selectedEvent.location}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[staticStyles.calloutButton, { backgroundColor: tc.calloutButtonBg, marginTop: 8 }]}
+              onPress={() => {
+                const target = {
+                  id: selectedEvent.id,
+                  lat: selectedEvent.lat,
+                  lng: selectedEvent.lng,
+                  title: selectedEvent.title
+                };
+
                 if (!location) {
                   setPendingTarget(target);
                   setManualStartInput('');
@@ -904,8 +1006,11 @@ export default function Map({ route }: any) {
               }}
             >
               <Icon name="navigation-2-outline" style={staticStyles.calloutIcon} fill={tc.navIconFill} />
-              <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>Navigate</Text>
+              <Text style={[staticStyles.calloutButtonText, { color: tc.calloutButtonText }]}>
+                Navigate
+              </Text>
             </TouchableOpacity>
+
           </View>
         )}
 

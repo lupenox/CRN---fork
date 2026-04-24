@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { Layout, Text, Icon, useTheme } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
-import eventsData from '../../scripts/events_geocoded.json';
 import { useRecentlySearched } from '../context/RecentlySearchedContext';
 // Types
 type DateFilter = 'all' | 'today' | '3days' | 'week';
@@ -58,10 +57,7 @@ function isSoon(dateStr: string): boolean {
   return diff >= 0 && diff <= 3;
 }
 
-const allEvents: Event[] = (eventsData as any[]).filter((e) => isValidEventDate(e.date)).map((e, i) => ({
-  ...e,
-  id: `event-${i}`,
-}));
+
 
 function isValidEventDate(dateStr: string): boolean {
   if (!dateStr || typeof dateStr !== 'string') return false;
@@ -77,6 +73,8 @@ function isValidEventDate(dateStr: string): boolean {
 // Main Screen
 export default function EventsScreen({ navigation, route }: any) {
   const theme = useTheme();
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+
   const [searchQuery, setSearchQuery] = useState(route?.params?.initialQuery ?? '');
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
   const [sortAsc, setSortAsc] = useState(true);
@@ -95,6 +93,22 @@ export default function EventsScreen({ navigation, route }: any) {
     success:      theme['color-success-500'],
     inputBg:      theme['color-basic-600'],
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://crn.crn.deno.net/dynamic?table=event');
+        const json = await response.json();
+        const events: Event[] = (json.data ?? [])
+          .filter((e: any) => isValidEventDate(e.date))
+          .map((e: any, i: number) => ({ ...e, id: `event-${i}` }));
+        setAllEvents(events);
+      } catch (error) {
+        console.log('Error fetching events:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filtered = useMemo(() => {
     const today = localMidnight(new Date());

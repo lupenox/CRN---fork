@@ -1,9 +1,9 @@
-import { sql } from "../db.ts"; 
+import { sql, EVENTS_TABLE_NAME } from "../db.ts"; 
 
 export async function cleanExpiredEvents() {
   try {
     const result = await sql`
-      DELETE FROM events 
+      DELETE FROM ${sql(EVENTS_TABLE_NAME)} 
       WHERE (date::timestamp) < CURRENT_TIMESTAMP
       RETURNING id, title;
     `;

@@ -4,6 +4,7 @@ import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AppHeader } from '../navigation/AppHeader';
 import Card from '../components/Card';
+import { useEnrolledClasses } from '../context/EnrolledClassesContext';
 
 const ClockIcon   = (props) => <Icon {...props} name="clock-outline" />;
 const PersonIcon  = (props) => <Icon {...props} name="person-outline" />;
@@ -14,6 +15,12 @@ const SCHD_LABEL = {
   LEC: 'Lecture', LAB: 'Lab', SEM: 'Seminar',
   IND: 'Independent Study', DIS: 'Discussion',
 };
+
+function deriveScheduleType(section: string): string {
+  const num = parseInt(section, 10);
+  if (isNaN(num)) return 'LEC';
+  return num >= 600 ? 'LAB' : 'LEC';
+}
 
 function getBadgeColors(schedType: string, theme: Record<string, string>) {
   switch (schedType) {
@@ -28,7 +35,9 @@ function getBadgeColors(schedType: string, theme: Record<string, string>) {
 function SectionCard({ section, onPress, theme }) {
   const hintColor    = theme['text-hint-color'];
   const hasTime      = section.meets && section.meets !== 'No Meeting Pattern';
-  const { bg, text } = getBadgeColors(section.schedule_type, theme);
+  const scheduleType = deriveScheduleType(section.section);
+  const { bg, text } = getBadgeColors(scheduleType, theme);
+  const { isEnrolled } = useEnrolledClasses();
 
   return (
     <Card style={styles.card} onPress={() => onPress(section)}>
@@ -37,7 +46,7 @@ function SectionCard({ section, onPress, theme }) {
           <View style={styles.badgeRow}>
             <View style={[styles.badge, { backgroundColor: bg }]}>
               <Text category="c2" style={{ color: text }}>
-                {SCHD_LABEL[section.schedule_type] ?? section.schedule_type}
+                {SCHD_LABEL[scheduleType] ?? scheduleType}
               </Text>
             </View>
             <Text category="c1" appearance="hint">Section {section.section}</Text>
@@ -66,7 +75,10 @@ function SectionCard({ section, onPress, theme }) {
           ) : null}
         </View>
 
-        <ChevronIcon style={styles.chevron} fill={hintColor} />
+        {isEnrolled(section.crn)
+          ? <Icon name="checkmark-circle-2-outline" style={styles.checkIcon} fill={theme['color-success-500']} />
+          : <ChevronIcon style={styles.chevron} fill={hintColor} />
+        }
       </View>
     </Card>
   );
@@ -78,8 +90,8 @@ export default function ClassSectionsScreen() {
   const theme      = useTheme();
   const { group }  = route.params as { group: any };
 
-  const lectures = group.sections.filter(s => s.schedule_type === 'LEC');
-  const others   = group.sections.filter(s => s.schedule_type !== 'LEC');
+  const lectures = group.sections.filter(s => parseInt(s.section, 10) < 600);
+  const others   = group.sections.filter(s => parseInt(s.section, 10) >= 600 || isNaN(parseInt(s.section, 10)));
 
   const renderHeader = (label: string, count: number) => (
     <View style={styles.groupHeader}>

@@ -12,19 +12,25 @@ export interface Course {
 }
 
 export async function searchCourses(query: string, subject: string): Promise<Course[]> {
-    const data: Course[] = require('../../scripts/uwm_courses.json');
+  try {
+    const response = await fetch('https://crn.crn.deno.net/dynamic?table=course');
+    const json = await response.json();
+    const data: Course[] = json.data ?? [];
 
     return data.filter((c) => {
       const matchesQuery = !query ||
-        c.title.toLowerCase().includes(query.toLowerCase()) ||
-        c.course_code.toLowerCase().includes(query.toLowerCase()) ||
-        c.instructor.toLowerCase().includes(query.toLowerCase()) ||
-        c.crn.includes(query);
+        c.title?.toLowerCase().includes(query.toLowerCase()) ||
+        c.course_code?.toLowerCase().includes(query.toLowerCase()) ||
+        c.instructor?.toLowerCase().includes(query.toLowerCase()) ||
+        c.crn?.includes(query);
 
       const matchesSubject = !subject ||
-        c.course_code.toUpperCase().startsWith(subject.toUpperCase());
+        c.course_code?.toUpperCase().startsWith(subject.toUpperCase());
 
       return matchesQuery && matchesSubject;
     });
-
+  } catch (error) {
+    console.log('Error fetching courses:', error);
+    return [];
+  }
 }

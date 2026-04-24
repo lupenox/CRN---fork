@@ -44,12 +44,11 @@
             "description",
             "location",
             "address",
-            "organizer",
             "phone",
             "website",
             "hours",
-            "lat",
-            "lng"
+            "latitude",
+            "longitude"
         ]
     },
     {
@@ -61,7 +60,7 @@
             "resource_id",
             "rating",
             "comment",
-            "create_at"
+            "created_at"
         ]
     },
     {

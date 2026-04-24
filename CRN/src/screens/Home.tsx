@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { StyleSheet, ScrollView, View, TouchableOpacity } from 'react-native';
 import { Layout, Text, Icon, useTheme } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
-import { mockResources } from '../data/mockData';
-import eventsData from '../../scripts/events_geocoded.json';
 import { useRecentlySearched } from '../context/RecentlySearchedContext';
+import { useEnrolledClasses } from '../context/EnrolledClassesContext';
+
 type Event = {
   id: string;
   title: string;
@@ -24,36 +24,54 @@ function localMidnight(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-function formatShortDate(dateStr: string): string {
-  return parseEventDate(dateStr).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric',
-  });
+const SCHD_LABEL: Record<string, string> = {
+  LEC: 'Lecture', LAB: 'Lab', SEM: 'Seminar',
+  IND: 'Independent', DIS: 'Discussion',
+};
+
+function getBadgeColors(schedType: string, theme: Record<string, string>) {
+  switch (schedType) {
+    case 'LEC': return { bg: theme['color-info-100'],    text: theme['color-info-700']    };
+    case 'LAB': return { bg: theme['color-warning-100'], text: theme['color-warning-700'] };
+    case 'SEM': return { bg: theme['color-success-100'], text: theme['color-success-700'] };
+    case 'IND': return { bg: theme['color-basic-200'],   text: theme['color-basic-600']   };
+    default:    return { bg: theme['color-primary-100'], text: theme['color-primary-700'] };
+  }
 }
 
-const allEvents: Event[] = (eventsData as any[]).map((e, i) => ({
-  ...e,
-  id: `event-${i}`,
-}));
-
-function getTodaysEvents(): Event[] {
-  const today = localMidnight(new Date());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return allEvents.filter((e) => {
-    const d = parseEventDate(e.date);
-    return d >= today && d < tomorrow;
-  });
-}
-
-// Home Screen
 export default function Home({ navigation }: any) {
+  const [eventsData, setEventsData] = useState<any[]>([]);
   const theme = useTheme();
-  const todayEvents = useMemo(() => getTodaysEvents(), []);
-  const displayedEvents = todayEvents.slice(0, 3);
-  const { recentSearches, clearRecentSearches  } = useRecentlySearched();
+  const { recentSearches, clearRecentSearches } = useRecentlySearched();
+  const { enrolledClasses } = useEnrolledClasses();
   const now = new Date();
   const hour = now.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://crn.crn.deno.net/dynamic?table=event');
+        const json = await response.json();
+        setEventsData(json.data ?? []);
+      } catch (error) {
+        console.log('Error:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const todayEvents = useMemo(() => {
+    const today = localMidnight(new Date());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return eventsData.filter((e) => {
+      const d = parseEventDate(e.date);
+      return d >= today && d < tomorrow;
+    });
+  }, [eventsData]);
+
+  const displayedEvents = todayEvents.slice(0, 3);
 
   const tc = {
     bg:          theme['color-basic-800'],
@@ -81,7 +99,6 @@ export default function Home({ navigation }: any) {
     Classes:   tc.warning,
     Directory: tc.success,
   };
-
   const SECTION_NAV: Record<string, string> = {
     Events:    'Events',
     Classes:   'ClassSearch',
@@ -146,12 +163,57 @@ export default function Home({ navigation }: any) {
           onAction={() => navigation.navigate('Classes')}
           tc={tc}
         >
-          <View style={[styles.emptySlot, { borderColor: tc.border }]}>
-            <Icon name="plus-outline" style={styles.emptySlotIcon} fill={tc.hint} />
-            <Text style={[styles.emptySlotText, { color: tc.hint }]}>
-              Add classes to see them here
-            </Text>
-          </View>
+          {enrolledClasses.length === 0 ? (
+            <View style={[styles.emptySlot, { borderColor: tc.border }]}>
+              <Icon name="plus-outline" style={styles.emptySlotIcon} fill={tc.hint} />
+              <Text style={[styles.emptySlotText, { color: tc.hint }]}>
+                Add classes to see them here
+              </Text>
+            </View>
+          ) : (
+            enrolledClasses.slice(0, 5).map((section) => (
+              <TouchableOpacity
+                key={section.crn}
+                style={[styles.listRow, { borderColor: tc.border }]}
+                onPress={() => navigation.navigate('ClassDetail', { course: section })}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.listAccent, { backgroundColor: tc.warning }]} />
+                <View style={styles.listBody}>
+                  <View style={styles.listTitleRow}>
+                    {(() => {
+                      const { bg, text } = getBadgeColors(section.schedule_type, theme);
+                      return (
+                        <View style={[styles.listBadge, { backgroundColor: bg }]}>
+                          <Text style={[styles.listBadgeText, { color: text }]}>
+                            {SCHD_LABEL[section.schedule_type] ?? section.schedule_type}
+                          </Text>
+                        </View>
+                      );
+                    })()}
+                    <Text style={[styles.listTitle, { color: tc.text, flex: 1 }]} numberOfLines={1}>
+                      {section.course_code} · {section.title}
+                    </Text>
+                  </View>
+                  <View style={styles.listMeta}>
+                    <Icon name="pin-outline" style={styles.listMetaIcon} fill={tc.hint} />
+                    <Text style={[styles.listMetaText, { color: tc.hint }]} numberOfLines={1}>
+                      {section.room ?? section.campus ?? 'TBA'}
+                    </Text>
+                  </View>
+                  <View style={styles.listMeta}>
+                    <Icon name="clock-outline" style={styles.listMetaIcon} fill={tc.hint} />
+                    <Text style={[styles.listMetaText, { color: tc.hint }]} numberOfLines={1}>
+                      {section.meets ?? (section.meeting_times && section.meeting_times?.[0] && section.meeting_times[0].day
+                        ? `${section.meeting_times[0].day} ${section.meeting_times[0].start_time}–${section.meeting_times[0].end_time}`
+                        : 'No meeting pattern')}
+                    </Text>
+                  </View>
+                </View>
+                <Icon name="chevron-right-outline" style={styles.listChevron} fill={tc.border} />
+              </TouchableOpacity>
+            ))
+          )}
         </SectionTile>
 
         {/* Today's Events tile */}
@@ -195,7 +257,7 @@ export default function Home({ navigation }: any) {
           )}
         </SectionTile>
 
-        {/* Recently Viewed tile */}
+        {/* Recent Searches tile */}
         <SectionTile
           icon="search-outline"
           iconColor={tc.info}
@@ -239,6 +301,7 @@ export default function Home({ navigation }: any) {
             ))
           )}
         </SectionTile>
+
         <View style={{ height: 32 }} />
       </ScrollView>
     </Layout>
@@ -287,9 +350,7 @@ function SectionTile({ icon, iconColor, title, subtitle, actionLabel, onAction, 
           <Icon name="arrow-forward-outline" style={styles.tileActionIcon} fill={iconColor} />
         </TouchableOpacity>
       </View>
-
       <View style={[styles.tileDivider, { backgroundColor: tc.border }]} />
-
       <View style={styles.tileContent}>
         {children}
       </View>
@@ -297,87 +358,48 @@ function SectionTile({ icon, iconColor, title, subtitle, actionLabel, onAction, 
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   root:  { flex: 1 },
   scroll: { padding: 16, gap: 14 },
-
   greetingRow: { marginBottom: 4 },
   greeting:    { fontSize: 13, fontWeight: '500', marginBottom: 2 },
   appName:     { fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
-
-  // Quick nav row
-  quickRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 2,
-  },
+  quickRow: { flexDirection: 'row', gap: 10, marginBottom: 2 },
   quickTile: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 14,
-    alignItems: 'center',
-    paddingVertical: 12,
-    gap: 6,
+    flex: 1, borderWidth: 1, borderRadius: 14,
+    alignItems: 'center', paddingVertical: 12, gap: 6,
   },
   quickIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 36, height: 36, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
   },
   quickIcon:  { width: 18, height: 18 },
   quickLabel: { fontSize: 11, fontWeight: '700' },
-
-  // Section tile
-  tile: {
-    borderWidth: 1,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
+  tile: { borderWidth: 1, borderRadius: 16, overflow: 'hidden' },
   tileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 14,
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', padding: 14,
   },
-  tileTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
+  tileTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   tileIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 36, height: 36, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
   },
   tileIcon:     { width: 18, height: 18 },
   tileTitle:    { fontSize: 15, fontWeight: '700' },
   tileSubtitle: { fontSize: 12, marginTop: 1 },
   tileAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    gap: 3,
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderRadius: 8,
+    paddingVertical: 4, paddingHorizontal: 8, gap: 3,
   },
   tileActionText: { fontSize: 12, fontWeight: '600' },
   tileActionIcon: { width: 12, height: 12 },
   tileDivider:    { height: 1 },
   tileContent:    { padding: 12, gap: 8 },
-
-  // List rows inside tiles
   listRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 10,
-    overflow: 'hidden',
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderRadius: 10, overflow: 'hidden',
   },
   listAccent:    { width: 4, alignSelf: 'stretch' },
   listBody:      { flex: 1, padding: 10 },
@@ -386,16 +408,13 @@ const styles = StyleSheet.create({
   listMetaIcon:  { width: 12, height: 12 },
   listMetaText:  { fontSize: 11, flex: 1 },
   listChevron:   { width: 16, height: 16, marginRight: 10 },
-
-  // Empty state slot
   emptySlot: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderRadius: 10,
-    alignItems: 'center',
-    paddingVertical: 20,
-    gap: 6,
+    borderWidth: 1, borderStyle: 'dashed', borderRadius: 10,
+    alignItems: 'center', paddingVertical: 20, gap: 6,
   },
   emptySlotIcon: { width: 24, height: 24 },
   emptySlotText: { fontSize: 13 },
+  listTitleRow:  { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 },
+  listBadge:     { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
+  listBadgeText: { fontSize: 10, fontWeight: '700' },
 });
