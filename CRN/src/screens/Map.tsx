@@ -15,6 +15,7 @@ type MapView_t = 'resources' | 'events';
 type DateFilter = 'today' | '3days' | 'week';
 
 type EventWithCoords = {
+    id: string;
   title: string;
   description: string;
   location: string;
@@ -506,7 +507,7 @@ export default function Map({ route, navigation }: any) {
   };
 
   const visibleEvents = filterEventsByDate(geocodedEvents, dateFilter)
-    .filter(e => e.lat && e.lng)
+    .filter(e => !isNaN(e.lat) && !isNaN(e.lng))
     .filter(e => !organizerFilter || e.organizer === organizerFilter);
 
   const visibleResources = allResources.filter(r =>
@@ -539,12 +540,12 @@ export default function Map({ route, navigation }: any) {
         const response = await fetch('https://crn.crn.deno.net/dynamic?table=resource');
         const json = await response.json();
         const resources: Resource[] = (json.data ?? [])
-          .filter((r: any) => r.lat != null && r.lng != null)
+          .filter((r: any) => r.latitude != null && r.longitude != null)
           .map((r: any, i: number) => ({
             ...r,
             id: r.id ?? `resource-${i}`,
-            lat: parseFloat(r.lat),
-            lng: parseFloat(r.lng),
+            lat: parseFloat(r.latitude),
+            lng: parseFloat(r.longitude),
           }));
         setAllResources(resources);
       } catch (error) {
@@ -560,12 +561,20 @@ export default function Map({ route, navigation }: any) {
         const response = await fetch('https://crn.crn.deno.net/dynamic?table=event');
         const json = await response.json();
         const events: EventWithCoords[] = (json.data ?? [])
-          .filter((e: any) => e.latitude != null && e.longitude != null && isValidEventDate(e.date))
+          .filter((e: any) => {
+            const lat = parseFloat(e.latitude ?? e.lat);
+            const lng = parseFloat(e.longitude ?? e.lng);
+            return !isNaN(lat) && !isNaN(lng) && isValidEventDate(e.date);
+          })
           .map((e: any, i: number) => ({
-            ...e,
             id: e.id ?? `event-${i}`,
-            lat: parseFloat(e.latitude),
-            lng: parseFloat(e.longitude),
+            title: e.title,
+            description: e.description,
+            location: e.location,
+            organizer: e.organizer,
+            date: e.date,
+            lat: parseFloat(e.latitude ?? e.lat),
+            lng: parseFloat(e.longitude ?? e.lng),
           }));
         setGeocodedEvents(events);
       } catch (error) {
