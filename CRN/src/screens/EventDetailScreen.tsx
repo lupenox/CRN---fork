@@ -1,14 +1,16 @@
-import { Modal, TextInput, Animated } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useRef, useEffect } from 'react';
-import React from 'react';
-import { useAuth0 } from 'react-native-auth0';
-import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
-import { Layout, Text, Icon, Divider, useTheme } from '@ui-kitten/components';
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
+import { Layout, Text, Icon, useTheme } from '@ui-kitten/components';
 import { AppHeader } from '../navigation/AppHeader';
-import Button from '../components/Button';
-
-const reviewedEventIds = new Set<string>();
+import { useRecentlySearched } from '../context/RecentlySearchedContext';
+// Types
+type DateFilter = 'all' | 'today' | '3days' | 'week';
 
 type Event = {
   id: string;
@@ -21,410 +23,371 @@ type Event = {
   lng?: number;
 };
 
+// Date helpers
 function parseEventDate(dateStr: string): Date {
   const [m, d, y] = dateStr.split('/').map(Number);
   return new Date(y, m - 1, d);
 }
 
-function formatDateLong(dateStr: string): string {
-  return parseEventDate(dateStr).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+function localMidnight(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-export default function EventDetailScreen({ route, navigation }: any) {
+function addDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function formatDate(dateStr: string): string {
+  const date = parseEventDate(dateStr);
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function isToday(dateStr: string): boolean {
+  const today = localMidnight(new Date());
+  const d = parseEventDate(dateStr);
+  return d.getTime() === today.getTime();
+}
+
+function isSoon(dateStr: string): boolean {
+  const today = localMidnight(new Date());
+  const d = parseEventDate(dateStr);
+  const diff = (d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+  return diff >= 0 && diff <= 3;
+}
+
+
+
+function isValidEventDate(dateStr: string): boolean {
+  if (!dateStr || typeof dateStr !== 'string') return false;
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return false;
+  const [m, d, y] = parts.map(Number);
+  if (isNaN(m) || isNaN(d) || isNaN(y)) return false;
+  if (m < 1 || m > 12 || d < 1 || d > 31 || y < 2000) return false;
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+}
+
+// Main Screen
+export default function EventsScreen({ navigation, route }: any) {
   const theme = useTheme();
-  const { user } = useAuth0();
-  const { event }: { event: Event } = route.params ?? {};
-  const [reviewVisible, setReviewVisible] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [submitted, setSubmitted] = useState(false);
-  const [hasReviewed, setHasReviewed] = useState(false);
-  const starScales = useRef(
-    [1, 2, 3, 4, 5].map(() => new Animated.Value(1))
-  ).current;
-  const [message, setMessage] = useState('');
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+
+  const [searchQuery, setSearchQuery] = useState(route?.params?.initialQuery ?? '');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+  const [sortAsc, setSortAsc] = useState(true);
+  const { addRecentSearch } = useRecentlySearched();
   const tc = {
-    bg:       theme['color-basic-800'],
-    surface:  theme['color-basic-700'],
-    border:   theme['color-basic-500'],
-    text:     theme['text-basic-color'],
-    hint:     theme['text-hint-color'],
-    primary:  theme['color-primary-500'],
-    info:     theme['color-info-500'],
+    bg:           theme['color-basic-800'],
+    surface:      theme['color-basic-700'],
+    surfaceAlt:   theme['color-basic-600'],
+    border:       theme['color-basic-500'],
+    text:         theme['text-basic-color'],
+    hint:         theme['text-hint-color'],
+    primary:      theme['color-primary-500'],
+    primaryLight: theme['color-primary-300'],
+    danger:       theme['color-danger-500'],
+    info:         theme['color-info-500'],
+    success:      theme['color-success-500'],
+    inputBg:      theme['color-basic-600'],
   };
 
   useEffect(() => {
-    if (event?.id && reviewedEventIds.has(event.id)) {
-      setHasReviewed(true);
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://crn.crn.deno.net/dynamic?table=event');
+        const json = await response.json();
+        const events: Event[] = (json.data ?? [])
+          .filter((e: any) => isValidEventDate(e.date))
+          .map((e: any, i: number) => ({ ...e, id: `event-${i}` }));
+        setAllEvents(events);
+      } catch (error) {
+        console.log('Error fetching events:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const today = localMidnight(new Date());
+    let events = [...allEvents];
+
+    // Date filter
+    if (dateFilter !== 'all') {
+      const limits: Record<Exclude<DateFilter, 'all'>, Date> = {
+        today:  addDays(today, 1),
+        '3days': addDays(today, 3),
+        week:   addDays(today, 7),
+      };
+      const end = limits[dateFilter as Exclude<DateFilter, 'all'>];
+      events = events.filter((e) => {
+        const d = parseEventDate(e.date);
+        return d >= today && d < end;
+      });
     }
-  }, [event?.id]);
 
-  const animateStar = (index: number) => {
-    Animated.sequence([
-      Animated.timing(starScales[index], {
-        toValue: 1.4,
-        duration: 120,
-        useNativeDriver: true,
-      }),
-      Animated.timing(starScales[index], {
-        toValue: 1,
-        duration: 120,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
+    // Search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      events = events.filter(
+        (e) =>
+          e.title.toLowerCase().includes(q) ||
+          e.organizer.toLowerCase().includes(q) ||
+          e.location.toLowerCase().includes(q)
+      );
+    }
 
-const handleSubmitReview = async () => {
-  try {
-    const response = await fetch('https://crn.crn.deno.net/dynamic?table=review', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event_id: event.id,
-        user_id: user?.sub ?? null,
-        rating,
-        comment: message,
-      }),
+    // Sort
+    events.sort((a, b) => {
+      const diff = parseEventDate(a.date).getTime() - parseEventDate(b.date).getTime();
+      return sortAsc ? diff : -diff;
     });
 
-    const result = await response.json();
-    console.log('Review POST response:', result);
+    return events;
+  }, [searchQuery, dateFilter, sortAsc, allEvents]);
 
-    if (!response.ok) {
-      console.log('Review POST failed:', response.status, result);
-      return;
+  // Group by date
+  const grouped = useMemo(() => {
+    const map: Record<string, Event[]> = {};
+    for (const e of filtered) {
+      if (!map[e.date]) map[e.date] = [];
+      map[e.date].push(e);
     }
+    return Object.entries(map);
+  }, [filtered]);
 
-    reviewedEventIds.add(event.id);
-    setSubmitted(true);
-    setHasReviewed(true);
-
-    setTimeout(() => {
-      setSubmitted(false);
-      setReviewVisible(false);
-      setRating(0);
-      setMessage('');
-    }, 1200);
-  } catch (err) {
-    console.log('Error submitting review:', err);
-  }
-};
-
-  if (!event) {
-    return (
-      <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>No event details available.</Text>
-      </Layout>
-    );
-  }
-
-  const hasCoords = event.lat != null && event.lng != null;
+  const DATE_FILTERS: { key: DateFilter; label: string }[] = [
+    { key: 'today',  label: 'Today'     },
+    { key: '3days',  label: '3 Days'    },
+    { key: 'week',   label: 'This Week' },
+    { key: 'all',    label: 'All'       },
+  ];
 
   return (
     <Layout style={[styles.root, { backgroundColor: tc.bg }]}>
-      <AppHeader title="Event Details" showBack={true} />
+      <AppHeader title="Events" />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      {/* Search bar */}
+      <View style={[styles.searchWrap, { backgroundColor: tc.surface }]}>
+        <Icon name="search-outline" style={styles.searchIcon} fill={tc.hint} />
+        <TextInput
+          style={[styles.searchInput, { color: tc.text }]}
+          placeholder="Search events, organizers..."
+          placeholderTextColor={tc.hint}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onBlur={() => {
+            if (searchQuery.trim()) addRecentSearch(searchQuery.trim(), 'Events');
+          }}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Icon name="close-outline" style={styles.clearIcon} fill={tc.hint} />
+          </TouchableOpacity>
+        )}
+      </View>
 
-        <View style={[styles.heroCard, { backgroundColor: tc.surface, borderColor: tc.border }]}>
-          <View style={[styles.heroStripe, { backgroundColor: tc.primary }]} />
+      {/* Filter and sort row */}
+      <View style={styles.controlRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+          {DATE_FILTERS.map(({ key, label }) => {
+            const active = dateFilter === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[
+                  styles.chip,
+                  { borderColor: active ? tc.primary : tc.border,
+                    backgroundColor: active ? tc.primary : 'transparent' },
+                ]}
+                onPress={() => setDateFilter(key)}
+              >
+                <Text style={[styles.chipText, { color: active ? '#000' : tc.hint }]}>
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
-          <View style={styles.heroBody}>
-            <Text style={[styles.heroTitle, { color: tc.text }]}>{event.title}</Text>
+      {/* Results count */}
+      <View style={styles.countRow}>
+        <Text style={[styles.countText, { color: tc.hint }]}>
+          {filtered.length} event{filtered.length !== 1 ? 's' : ''}
+        </Text>
+      </View>
 
-            <View style={[styles.dateBadge, { backgroundColor: tc.primary + '22', borderColor: tc.primary + '55' }]}>
-              <Icon name="calendar-outline" style={styles.badgeIcon} fill={tc.primary} />
-              <Text style={[styles.dateBadgeText, { color: tc.primary }]}>
-                {formatDateLong(event.date)}
-              </Text>
-            </View>
+      {/* Event list grouped by date */}
+      <ScrollView contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
+        {grouped.length === 0 ? (
+          <View style={styles.emptyWrap}>
+            <Icon name="calendar-outline" style={styles.emptyIcon} fill={tc.border} />
+            <Text style={[styles.emptyText, { color: tc.hint }]}>No events found</Text>
           </View>
-        </View>
+        ) : (
+          grouped.map(([date, events]) => (
+            <View key={date}>
+              {/* Date header */}
+              <View style={styles.dateHeader}>
+                <View style={[styles.datePill, {
+                  backgroundColor: isToday(date) ? tc.primary : tc.surfaceAlt,
+                }]}>
+                  <Text style={[styles.datePillText, {
+                    color: isToday(date) ? '#000' : tc.hint,
+                  }]}>
+                    {isToday(date) ? 'TODAY' : formatDate(date).toUpperCase()}
+                  </Text>
+                </View>
+                <View style={[styles.dateLine, { backgroundColor: tc.border }]} />
+              </View>
 
-        {/* Info rows */}
-        <View style={[styles.infoCard, { backgroundColor: tc.surface, borderColor: tc.border }]}>
-
-          <InfoRow
-            icon="person-outline"
-            label="Organizer"
-            value={event.organizer}
-            tc={tc}
-          />
-          <Divider style={{ marginVertical: 2 }} />
-          <InfoRow
-            icon="pin-outline"
-            label="Location"
-            value={event.location}
-            tc={tc}
-          />
-
-        </View>
-
-        {/* Description */}
-        {event.description ? (
-          <View style={[styles.descCard, { backgroundColor: tc.surface, borderColor: tc.border }]}>
-            <View style={styles.descHeader}>
-              <Icon name="file-text-outline" style={styles.descIcon} fill={tc.hint} />
-              <Text style={[styles.descLabel, { color: tc.hint }]}>About this event</Text>
+              {/* Cards for this date */}
+              {events.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  tc={tc}
+                  onPress={() => navigation.navigate('EventDetail', { event })}
+                />
+              ))}
             </View>
-            <Text style={[styles.descText, { color: tc.text }]}>{event.description}</Text>
-          </View>
-        ) : null}
-
-        {/* Actions */}
-        <View style={styles.actions}>
-          <Button
-            style={styles.actionBtn}
-            onPress={() =>
-              navigation.navigate('Map', {
-                targetLocation: {
-                  id: event.id,
-                  lat: event.lat,
-                  lng: event.lng,
-                  title: event.title,
-                },
-                mapViewMode: 'events',
-              })
-            }
-            accessoryLeft={(props) => <Icon {...props} name="map-outline" />}
-          >
-            {hasCoords ? 'View on Map' : 'Show on Map'}
-          </Button>
-
-          <Button
-            style={styles.actionBtn}
-            disabled={hasReviewed}
-            onPress={() => setReviewVisible(true)}
-            accessoryLeft={(props) => (
-              <Icon {...props} name={hasReviewed ? 'star' : 'star-outline'} />
-            )}
-          >
-            {hasReviewed ? 'Already Reviewed' : 'Leave a Review'}
-          </Button>
-
-        </View>
-
+          ))
+        )}
         <View style={{ height: 32 }} />
       </ScrollView>
-      <Modal visible={reviewVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalCard, { backgroundColor: tc.surface }]}>
-
-            <Text style={[styles.modalTitle, { color: tc.text }]}>
-              Leave a Review
-            </Text>
-
-            {submitted ? (
-              <View style={styles.successContainer}>
-                <Icon
-                  name="checkmark-circle-2-outline"
-                  fill={tc.primary}
-                  style={{ width: 40, height: 40 }}
-                />
-                <Text style={{ color: tc.text, marginTop: 8 }}>
-                  Review submitted!
-                </Text>
-              </View>
-            ) : (
-              <>
-                {/* Stars */}
-                <View style={styles.starsRow}>
-                  {[1, 2, 3, 4, 5].map((star, index) => (
-                    <TouchableOpacity
-                      key={star}
-                      onPress={() => {
-                        setRating(star);
-                        animateStar(index);
-                      }}
-                    >
-                      <Animated.View style={{ transform: [{ scale: starScales[index] }] }}>
-                        <Icon
-                          name={star <= rating ? "star" : "star-outline"}
-                          fill={tc.primary}
-                          style={styles.starIcon}
-                        />
-                      </Animated.View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* Message */}
-                <TextInput
-                  placeholder="Write a review..."
-                  placeholderTextColor={tc.hint}
-                  value={message}
-                  onChangeText={setMessage}
-                  multiline
-                  style={[
-                    styles.input,
-                    { color: tc.text, borderColor: tc.border }
-                  ]}
-                />
-
-                {/* Actions */}
-                <View style={styles.modalActions}>
-                  <Button
-                    appearance="ghost"
-                    onPress={() => {
-                      setReviewVisible(false);
-                      setRating(0);
-                      setMessage('');
-                      setSubmitted(false);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    disabled={rating === 0}
-                    onPress={handleSubmitReview}
-                  >
-                    Submit
-                  </Button>
-                </View>
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
     </Layout>
   );
 }
 
-// Info Row
-function InfoRow({ icon, label, value, tc }: { icon: string; label: string; value: string; tc: any }) {
+// Event Card
+function EventCard({ event, tc, onPress }: { event: Event; tc: any; onPress: () => void }) {
+  const hasCoords = event.lat != null && event.lng != null;
+
   return (
-    <View style={styles.infoRow}>
-      <View style={[styles.infoIconWrap, { backgroundColor: tc.primary + '18' }]}>
-        <Icon name={icon} style={styles.infoIcon} fill={tc.primary} />
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: tc.surface, borderColor: tc.border }]}
+      onPress={onPress}
+      activeOpacity={0.75}
+    >
+      <View style={[styles.cardAccent, { backgroundColor: tc.primary }]} />
+
+      <View style={styles.cardBody}>
+        <Text style={[styles.cardTitle, { color: tc.text }]} numberOfLines={2}>
+          {event.title}
+        </Text>
+
+        <View style={styles.cardMeta}>
+          <Icon name="person-outline" style={styles.metaIcon} fill={tc.hint} />
+          <Text style={[styles.metaText, { color: tc.hint }]} numberOfLines={1}>
+            {event.organizer}
+          </Text>
+        </View>
+
+        <View style={styles.cardMeta}>
+          <Icon name="pin-outline" style={styles.metaIcon} fill={tc.hint} />
+          <Text style={[styles.metaText, { color: tc.hint }]} numberOfLines={1}>
+            {event.location.split(',')[0]}
+          </Text>
+        </View>
       </View>
-      <View style={styles.infoText}>
-        <Text style={[styles.infoLabel, { color: tc.hint }]}>{label}</Text>
-        <Text style={[styles.infoValue, { color: tc.text }]}>{value}</Text>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
 // Styles
 const styles = StyleSheet.create({
-  root:   { flex: 1 },
-  scroll: { padding: 16, gap: 12 },
+  root: { flex: 1 },
 
-  heroCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    overflow: 'hidden',
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  searchIcon: { width: 18, height: 18, marginRight: 8 },
+  clearIcon:  { width: 18, height: 18, marginLeft: 4  },
+  searchInput: { flex: 1, fontSize: 14, paddingVertical: 0 },
+
+  controlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 16,
     marginBottom: 4,
   },
-  heroStripe: { height: 5 },
-  heroBody:   { padding: 16 },
-  heroTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    lineHeight: 26,
-    marginBottom: 12,
+  chipScroll: { paddingLeft: 16, paddingVertical: 4 },
+  chip: {
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 14,
+    marginRight: 8,
   },
-  dateBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
+  chipText: { fontSize: 12, fontWeight: '600' },
+
+  sortBtn: {
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    gap: 6,
+    padding: 6,
+    marginLeft: 4,
   },
-  badgeIcon:     { width: 14, height: 14 },
-  dateBadgeText: { fontSize: 13, fontWeight: '600' },
+  sortIcon: { width: 16, height: 16 },
 
-  infoCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  successContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 20,
-  },
-  infoRow: {
+  countRow: { paddingHorizontal: 16, paddingBottom: 4 },
+  countText: { fontSize: 12 },
+
+  listContent: { paddingHorizontal: 16 },
+
+  dateHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: 14,
-    gap: 12,
-  },
-  infoIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoIcon:  { width: 18, height: 18 },
-  infoText:  { flex: 1 },
-  infoLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
-  infoValue: { fontSize: 14, lineHeight: 20 },
-
-  descCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 14,
-  },
-  descHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
-  descIcon:   { width: 15, height: 15 },
-  descLabel:  { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
-  descText:   { fontSize: 14, lineHeight: 22 },
-
-  actions:   { gap: 10, marginTop: 4 },
-  actionBtn: { width: '100%' },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-
-  modalCard: {
-    width: '100%',
-    borderRadius: 16,
-    padding: 16,
-  },
-
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-
-  starsRow: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    gap: 6,
-  },
-
-  starIcon: {
-    width: 28,
-    height: 28,
-  },
-
-  input: {
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    minHeight: 80,
-    textAlignVertical: 'top',
-    marginBottom: 12,
-  },
-
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    marginTop: 16,
+    marginBottom: 8,
     gap: 10,
   },
+  datePill: {
+    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+  },
+  datePillText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
+  dateLine: { flex: 1, height: 1 },
+
+  card: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderRadius: 12,
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  cardAccent: { width: 4 },
+  cardBody: { flex: 1, padding: 12 },
+  cardTitle: { fontSize: 14, fontWeight: '700', marginBottom: 6, lineHeight: 20 },
+  cardMeta: { flexDirection: 'row', alignItems: 'center', marginBottom: 3 },
+  metaIcon: { width: 13, height: 13, marginRight: 5 },
+  metaText: { fontSize: 12, flex: 1 },
+
+  cardRight: {
+    paddingRight: 10,
+    paddingTop: 10,
+    alignItems: 'center',
+    gap: 8,
+  },
+  chevron: { width: 18, height: 18 },
+  mapBadge: {
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 4,
+  },
+  mapBadgeIcon: { width: 13, height: 13 },
+
+  emptyWrap: { alignItems: 'center', paddingTop: 60, gap: 12 },
+  emptyIcon: { width: 48, height: 48 },
+  emptyText: { fontSize: 15 },
 });

@@ -146,7 +146,7 @@ export default function EventsScreen({ navigation, route }: any) {
     });
 
     return events;
-  }, [searchQuery, dateFilter, sortAsc]);
+  }, [searchQuery, dateFilter, sortAsc, allEvents]);
 
   // Group by date
   const grouped = useMemo(() => {
