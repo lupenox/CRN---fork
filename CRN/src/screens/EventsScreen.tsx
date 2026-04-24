@@ -101,7 +101,12 @@ export default function EventsScreen({ navigation, route }: any) {
         const json = await response.json();
         const events: Event[] = (json.data ?? [])
           .filter((e: any) => isValidEventDate(e.date))
-          .map((e: any, i: number) => ({ ...e, id: `event-${i}` }));
+          .map((e: any, i: number) => ({
+            ...e,
+            id: `event-${i}`,
+            lat: e.lat ?? (e.latitude ? parseFloat(e.latitude) : undefined),
+            lng: e.lng ?? (e.longitude ? parseFloat(e.longitude) : undefined),
+          }));
         setAllEvents(events);
       } catch (error) {
         console.log('Error fetching events:', error);
@@ -146,7 +151,7 @@ export default function EventsScreen({ navigation, route }: any) {
     });
 
     return events;
-  }, [searchQuery, dateFilter, sortAsc]);
+  }, [searchQuery, dateFilter, sortAsc, allEvents]);
 
   // Group by date
   const grouped = useMemo(() => {

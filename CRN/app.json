@@ -4,7 +4,7 @@
     "slug": "CRN",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,10 +15,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "edu.uwm.app",
-      "config":{
+      "config": {
         "googleMaps": {
           "apiKey": "AIzaSyAm_mrIr3my6R_QJpdFOiiVGiO_G_86Svc"
         }
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -38,13 +41,18 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins":[
+    "plugins": [
       [
-      "react-native-auth0",
-      {
-        "domain": "dev-85gf7oggpaitwy0i.us.auth0.com"
-      }
+        "react-native-auth0",
+        {
+          "domain": "dev-85gf7oggpaitwy0i.us.auth0.com"
+        }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "19e7b649-b701-49d0-bfed-00a7509f2a86"
+      }
+    }
   }
 }
