@@ -28,6 +28,14 @@
         ]
     },
     {
+        "name": "event_stats",
+        "allowedColumns": [
+            "id",
+            "eventId",
+            "accessRequests"
+        ]
+    },
+    {
         "name": "resource",
         "allowedColumns": [
             "id",

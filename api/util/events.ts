@@ -1,4 +1,5 @@
 import { sql, EVENTS_TABLE_NAME } from "../db.ts";
+import { logAppStat } from "./appStats.ts";
 
 export type CrnEvent = {
     Title : string,
@@ -10,9 +11,24 @@ export type CrnEvent = {
 
 export const getEvents = async (id?: string | null ) => {
     if (id) {
+        await logAppStat(EVENTS_TABLE_NAME, Number.parseInt(id));
         return await sql`SELECT * FROM ${sql(EVENTS_TABLE_NAME)} WHERE id = ${id};`;
     } 
     return await sql`SELECT * FROM ${sql(EVENTS_TABLE_NAME)};`;
+}
+
+export async function hasEvent(id : number) {
+    let res;
+    try {
+        res = await sql`
+            SELECT * FROM ${sql(EVENTS_TABLE_NAME)}
+            WHERE id = ${id};
+        `;
+    } catch {
+        return false;
+    }
+
+    return res.count > 0;
 }
 
 export const deleteEvent = async (id: string) => {
