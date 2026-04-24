@@ -92,8 +92,8 @@ await sql`
         phone TEXT,
         website TEXT,
         hours TEXT,
-        latitude TEXT,
-        longitude TEXT
+        latitude NUMERIC,
+        longitude NUMERIC 
     );
 `;
 
