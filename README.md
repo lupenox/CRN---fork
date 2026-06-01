@@ -31,6 +31,10 @@ Campus Resource Navigator is designed to make university life easier by bringing
 - Auth0
 - AsyncStorage
 - Context API
+- Jest
+- Deno
+- GitHub Actions
+- PostgreSQL
 
 ## Project Structure
 
@@ -49,13 +53,17 @@ CRN/
 
 ## My Contributions
 
-- Built and refined mobile screens using React Native and TypeScript
-- Worked with React Navigation for multi-screen app routing
-- Helped integrate shared app state through React Context
-- Improved UI consistency using UI Kitten and custom theming
-- Tested the app through Android emulator builds
-- Debugged dependency, Android SDK, Java, Gradle, and Expo development build issues
-- Prepared the project for portfolio and resume presentation
+My work focused on testing, automation, data tooling, database design, and project reliability.
+
+- Wrote manual test cases to validate app behavior and support capstone QA efforts
+- Set up GitHub Actions workflows using Deno for automated checks
+- Added linting support to improve code quality and maintain consistency across the project
+- Built data collection scripts to gather UWM campus resource and event information for use in the app
+- Created database maintenance scripts to remove stale or outdated PostgreSQL records
+- Designed the database schema for the events table
+- Worked with Jest for backend and application testing
+- Explored Detox for end-to-end mobile testing, but could not fully integrate it due to conflicting backend runtime requirements
+- Debugged Android, Expo, Java, Gradle, dependency, and emulator setup issues while preparing the project for portfolio presentation
 
 ## Running the Project
 
