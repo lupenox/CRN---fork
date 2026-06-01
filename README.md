@@ -92,11 +92,27 @@ npx expo start --dev-client
 
 ## Screenshots
 
-Screenshots coming soon.
+### Home Screen
+
+<p align="center">
+  <img src="README_Assets/Home.png" width="260" alt="CRN home screen" />
+</p>
+
+### Dark Mode
+
+<p align="center">
+  <img src="README_Assets/Home_Dark.png" width="260" alt="CRN home screen in dark mode" />
+</p>
+
+### Navigation Menu
+
+<p align="center">
+  <img src="README_Assets/Navbar.png" width="260" alt="CRN navigation menu" />
+</p>
 
 ## Status
 
-This project was developed as part of a university capstone course. Additional polish, screenshots, and documentation are being added as the project is prepared for portfolio use.
+This project was developed as part of a university capstone course. Additional polish and documentation are being added as the project is prepared for portfolio use.
 
 ## License
 
